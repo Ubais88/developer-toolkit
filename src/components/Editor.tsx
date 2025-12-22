@@ -61,6 +61,7 @@ export const Editor = ({
           fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
           lineNumbers: 'on',
           renderLineHighlight: 'all',
+          wordWrap: 'on',
         }}
       />
     </div>
