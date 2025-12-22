@@ -17,7 +17,7 @@ export const useToast = () => {
 
     setTimeout(() => {
       setToasts(prev => prev.filter(toast => toast.id !== id));
-    }, 3000);
+    }, 2000);
   }, []);
 
   const removeToast = useCallback((id: string) => {

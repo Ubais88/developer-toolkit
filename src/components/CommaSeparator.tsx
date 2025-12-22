@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useSessionState } from '../hooks/useSessionState';
 import { Editor } from './Editor';
 import { Button } from './Button';
 import { Copy, Wand2 } from 'lucide-react';
@@ -9,11 +9,11 @@ interface CommaSeparatorProps {
 }
 
 export const CommaSeparator = ({ onCopy }: CommaSeparatorProps) => {
-  const [input, setInput] = useState('');
-  const [output, setOutput] = useState('');
-  const [quoteType, setQuoteType] = useState<'none' | 'single' | 'double'>('none');
-  const [removeDuplicates, setRemoveDuplicates] = useState(false);
-  const [trimSpaces, setTrimSpaces] = useState(true);
+  const [input, setInput] = useSessionState('comma-input', '');
+  const [output, setOutput] = useSessionState('comma-output', '');
+  const [quoteType, setQuoteType] = useSessionState<'none' | 'single' | 'double'>('comma-quote-type', 'none');
+  const [removeDuplicates, setRemoveDuplicates] = useSessionState('comma-remove-duplicates', false);
+  const [trimSpaces, setTrimSpaces] = useSessionState('comma-trim-spaces', true);
 
   const handleGenerate = () => {
     try {

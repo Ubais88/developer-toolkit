@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSessionState } from '../hooks/useSessionState';
 import { Editor } from './Editor';
 import { Button } from './Button';
 import { FileCode, GitCompare, CheckCircle, XCircle } from 'lucide-react';
@@ -9,10 +10,10 @@ interface SQLCompareProps {
 }
 
 export const SQLCompare = ({ onCopy }: SQLCompareProps) => {
-  const [sql1, setSql1] = useState('');
-  const [sql2, setSql2] = useState('');
-  const [ignoreWhitespace, setIgnoreWhitespace] = useState(true);
-  const [ignoreCase, setIgnoreCase] = useState(true);
+  const [sql1, setSql1] = useSessionState('sql-compare-sql1', '');
+  const [sql2, setSql2] = useSessionState('sql-compare-sql2', '');
+  const [ignoreWhitespace, setIgnoreWhitespace] = useSessionState('sql-compare-ignore-whitespace', true);
+  const [ignoreCase, setIgnoreCase] = useSessionState('sql-compare-ignore-case', true);
   const [result, setResult] = useState<{ same: boolean; formatted1: string; formatted2: string } | null>(null);
 
   const handleCompare = () => {

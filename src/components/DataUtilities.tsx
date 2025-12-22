@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useSessionState } from '../hooks/useSessionState';
 import { Editor } from './Editor';
 import { Button } from './Button';
 import { Copy, Hash, Clock, FileJson, FileText, ShieldCheck, Link, Lock, Key } from 'lucide-react';
@@ -36,29 +36,29 @@ const Container = ({ children, title, icon: Icon, colorClass }: any) => (
 );
 
 export const DataUtilities = ({ onCopy }: DataUtilitiesProps) => {
-  const [uuids, setUuids] = useState<string[]>([]);
-  const [timestampInput, setTimestampInput] = useState('');
-  const [timestampOutput, setTimestampOutput] = useState('');
-  const [dateInput, setDateInput] = useState('');
-  const [dateOutput, setDateOutput] = useState('');
-  const [jsonInput, setJsonInput] = useState('');
-  const [csvOutput, setCsvOutput] = useState('');
-  const [csvInput, setCsvInput] = useState('');
-  const [jsonOutput, setJsonOutput] = useState('');
-  const [escapeInput, setEscapeInput] = useState('');
-  const [escapeOutput, setEscapeOutput] = useState('');
-  const [escapeType, setEscapeType] = useState<'sql' | 'json'>('sql');
+  const [uuids, setUuids] = useSessionState<string[]>('data-uuids', []);
+  const [timestampInput, setTimestampInput] = useSessionState('data-timestamp-input', '');
+  const [timestampOutput, setTimestampOutput] = useSessionState('data-timestamp-output', '');
+  const [dateInput, setDateInput] = useSessionState('data-date-input', '');
+  const [dateOutput, setDateOutput] = useSessionState('data-date-output', '');
+  const [jsonInput, setJsonInput] = useSessionState('data-json-to-csv-input', '');
+  const [csvOutput, setCsvOutput] = useSessionState('data-json-to-csv-output', '');
+  const [csvInput, setCsvInput] = useSessionState('data-csv-to-json-input', '');
+  const [jsonOutput, setJsonOutput] = useSessionState('data-csv-to-json-output', '');
+  const [escapeInput, setEscapeInput] = useSessionState('data-escape-input', '');
+  const [escapeOutput, setEscapeOutput] = useSessionState('data-escape-output', '');
+  const [escapeType, setEscapeType] = useSessionState<'sql' | 'json'>('data-escape-type', 'sql');
 
   // New states
-  const [base64Input, setBase64Input] = useState('');
-  const [base64Output, setBase64Output] = useState('');
-  const [urlInput, setUrlInput] = useState('');
-  const [urlOutput, setUrlOutput] = useState('');
-  const [jwtInput, setJwtInput] = useState('');
-  const [jwtOutput, setJwtOutput] = useState('');
-  const [hashInput, setHashInput] = useState('');
-  const [hashOutput, setHashOutput] = useState('');
-  const [hashAlgo, setHashAlgo] = useState<'SHA-256' | 'SHA-512' | 'SHA-1'>('SHA-256');
+  const [base64Input, setBase64Input] = useSessionState('data-base64-input', '');
+  const [base64Output, setBase64Output] = useSessionState('data-base64-output', '');
+  const [urlInput, setUrlInput] = useSessionState('data-url-input', '');
+  const [urlOutput, setUrlOutput] = useSessionState('data-url-output', '');
+  const [jwtInput, setJwtInput] = useSessionState('data-jwt-input', '');
+  const [jwtOutput, setJwtOutput] = useSessionState('data-jwt-output', '');
+  const [hashInput, setHashInput] = useSessionState('data-hash-input', '');
+  const [hashOutput, setHashOutput] = useSessionState('data-hash-output', '');
+  const [hashAlgo, setHashAlgo] = useSessionState<'SHA-256' | 'SHA-512' | 'SHA-1'>('data-hash-algo', 'SHA-256');
 
   const handleGenerateUUID = (count: number = 1) => {
     const newUuids = Array.from({ length: count }, () => generateUUID());

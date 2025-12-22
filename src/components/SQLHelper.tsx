@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useSessionState } from '../hooks/useSessionState';
 import { Editor } from './Editor';
 import { Button } from './Button';
 import { Copy, FileCode, Type, Eraser, ListOrdered } from 'lucide-react';
@@ -9,10 +9,10 @@ interface SQLHelperProps {
 }
 
 export const SQLHelper = ({ onCopy }: SQLHelperProps) => {
-  const [input, setInput] = useState('');
-  const [inClauseInput, setInClauseInput] = useState('');
-  const [inClauseOutput, setInClauseOutput] = useState('');
-  const [inClauseQuoteType, setInClauseQuoteType] = useState<'none' | 'single' | 'double'>('single');
+  const [input, setInput] = useSessionState('sql-helper-input', '');
+  const [inClauseInput, setInClauseInput] = useSessionState('sql-helper-in-clause-input', '');
+  const [inClauseOutput, setInClauseOutput] = useSessionState('sql-helper-in-clause-output', '');
+  const [inClauseQuoteType, setInClauseQuoteType] = useSessionState<'none' | 'single' | 'double'>('sql-helper-quote-type', 'single');
 
   const handleFormat = () => {
     try {

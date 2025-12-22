@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
+import { useSessionState } from '../hooks/useSessionState';
 import { DiffEditor, MonacoDiffEditor, useMonaco } from '@monaco-editor/react';
 import { Button } from './Button';
 import { FileJson, ArrowRight, ArrowLeft } from 'lucide-react';
@@ -12,8 +13,8 @@ interface JSONCompareProps {
 export const JSONCompare = ({ onCopy }: JSONCompareProps) => {
   const { mode } = useTheme();
   const monaco = useMonaco();
-  const [original, setOriginal] = useState('');
-  const [modified, setModified] = useState('');
+  const [original, setOriginal] = useSessionState('json-compare-original', '');
+  const [modified, setModified] = useSessionState('json-compare-modified', '');
   
   const diffEditorRef = useRef<MonacoDiffEditor | null>(null);
   const widgetsRef = useRef<any[]>([]);
@@ -31,8 +32,10 @@ export const JSONCompare = ({ onCopy }: JSONCompareProps) => {
   const handleFormat = () => {
     try {
       const values = getEditorValues();
-      setOriginal(formatJSON(values.original));
-      setModified(formatJSON(values.modified));
+      const formattedOriginal = formatJSON(values.original);
+      const formattedModified = formatJSON(values.modified);
+      setOriginal(formattedOriginal);
+      setModified(formattedModified);
       onCopy('JSON formatted');
     } catch (error) {
       onCopy('Invalid JSON');
@@ -79,12 +82,7 @@ export const JSONCompare = ({ onCopy }: JSONCompareProps) => {
             text = originalModel.getValueInRange(range);
          }
 
-         // Determine replacement range in Modified
-         // If insertion (change.modifiedEnd < start), we insert at start
-         // If modification/deletion (change.modifiedEnd >= start), we replace lines
-         
          if (change.modifiedEndLineNumber >= change.modifiedStartLineNumber) {
-            // Replace existing lines
             const range = new monaco.Range(
               change.modifiedStartLineNumber,
               1,
@@ -93,42 +91,12 @@ export const JSONCompare = ({ onCopy }: JSONCompareProps) => {
             );
             modifiedEditor.executeEdits('diff', [{ range, text, forceMoveMarkers: true }]);
          } else {
-             // Insertion point (target is empty here)
-             // We want to insert lines.
-             // But executeEdits with range (line, 1, line, 1) inserts.
-             // If we copy 3 lines, we insert 3 lines.
-             // We need to handle newline carefully if inserting into middle of content?
-             // Actually, monaco diff lines are whole lines.
-             // If we insert at line X, we push down line X?
-             // Yes.
              const range = new monaco.Range(
                change.modifiedStartLineNumber,
                1,
                change.modifiedStartLineNumber,
                1
              );
-             // If putting multiple lines, ensure we add newline if needed?
-             // Actually, getValueInRange doesn't get trailing newline of last line usually?
-             // Wait, if we replace lines, we replace content.
-             // If we insert, we need to add newlines?
-             // Let's assume text contains newlines for the block.
-             // Use `text + '\n'`?
-             // A simpler way: use full line ranges including the newline character?
-             // `getValue` usually excludes last newline?
-             
-             // Simpler approach:
-             // Use `setValue` for the whole doc? No, slow.
-             
-             // Let's trust that replacing range (start, 1) to (end, maxCol) works for replacement.
-             // For insertion: we insert at (start, 1).
-             // If we insert "A\nB\nC", it works.
-             // If we rely on getLineChanges, it maps lines.
-             
-             // If simple replacement/insertion creates weird newline issues, manual fix might be needed.
-             // But standard approach:
-             if (text) text += '\n'; // Usually need a newline when inserting a block of lines?
-             // Actually, it depends if we are appending or inserting.
-             // Let's rely on standard executeEdits behavior.
              modifiedEditor.executeEdits('diff', [{ range, text: text.trimEnd() + (text ? '\n' : ''), forceMoveMarkers: true }]);
          }
        } else {
@@ -176,10 +144,6 @@ export const JSONCompare = ({ onCopy }: JSONCompareProps) => {
        
        changes.forEach((change, idx) => {
           // L -> R Button (Overlay on Original)
-          // Only if original has lines to copy (deletion or modifications)
-          // If original has 0 lines (insertion in mod), we effectively "delete" in mod if we apply L->R (i.e. make equal).
-          // We can always show button "Make Right like Left".
-          
           const l2rBtn = document.createElement('div');
           l2rBtn.innerHTML = '→';
           l2rBtn.className = 'cursor-pointer bg-blue-100 hover:bg-blue-200 text-blue-700 rounded px-1 text-xs font-bold border border-blue-300 z-50';
@@ -230,11 +194,10 @@ export const JSONCompare = ({ onCopy }: JSONCompareProps) => {
     return () => {
       disposable.dispose();
       widgetsRef.current.forEach(() => {
-         // Cleanup if possible? Usually removing widget is enough, which we do on update.
-         // But on unmount, editor might dispose widgets itself.
+         // Cleanup
       });
     };
-  }, [monaco]); // Removing mode dependency to avoid re-running on theme switch which might flick widgets, but monaco instance is stable.
+  }, [monaco]); 
 
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900">
@@ -275,6 +238,20 @@ export const JSONCompare = ({ onCopy }: JSONCompareProps) => {
                 theme={mode === 'dark' ? 'vs-dark' : 'light'}
                 onMount={(editor) => {
                   diffEditorRef.current = editor;
+                  const originalModel = editor.getOriginalEditor().getModel();
+                  const modifiedModel = editor.getModifiedEditor().getModel();
+                  
+                  // Sync editor changes to state for persistence
+                  if (originalModel) {
+                     originalModel.onDidChangeContent(() => {
+                         setOriginal(originalModel.getValue());
+                     });
+                  }
+                  if (modifiedModel) {
+                     modifiedModel.onDidChangeContent(() => {
+                         setModified(modifiedModel.getValue());
+                     });
+                  }
                 }}
                 options={{
                   originalEditable: true,
