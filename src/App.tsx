@@ -19,8 +19,8 @@ function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleCopy = (text: string) => {
-    showToast(text, 'success');
+  const handleCopy = (text: string, type: 'success' | 'error' | 'info' = 'success') => {
+    showToast(text, type);
   };
 
   const tabs = [

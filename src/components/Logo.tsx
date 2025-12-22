@@ -3,7 +3,7 @@
 import { useId } from 'react';
 
 export const Logo = ({ className = "w-8 h-8" }: { className?: string }) => {
-  const gradientId = useId();
+  const gradientId = useId().replace(/:/g, "-");
   
   return (
     <svg
