@@ -1,7 +1,8 @@
+import { useRef } from 'react';
 import { useSessionState } from '../hooks/useSessionState';
 import { Editor } from './Editor';
 import { Button } from './Button';
-import { Copy, Hash, Clock, FileJson, FileText, ShieldCheck, Link, Lock, Key } from 'lucide-react';
+import { Copy, Hash, Clock, FileJson, FileText, ShieldCheck, Link, Lock, Key, FileSpreadsheet, Trash2 } from 'lucide-react';
 import {
   generateUUID,
   timestampToDate,
@@ -16,6 +17,8 @@ import {
   urlDecode,
   decodeJWT,
   generateHash,
+  excelToBinaryString,
+  binaryStringToBlob,
 } from '../utils/dataUtils';
 
 interface DataUtilitiesProps {
@@ -59,6 +62,10 @@ export const DataUtilities = ({ onCopy }: DataUtilitiesProps) => {
   const [hashInput, setHashInput] = useSessionState('data-hash-input', '');
   const [hashOutput, setHashOutput] = useSessionState('data-hash-output', '');
   const [hashAlgo, setHashAlgo] = useSessionState<'SHA-256' | 'SHA-512' | 'SHA-1'>('data-hash-algo', 'SHA-256');
+
+  const [excelBinaryInput, setExcelBinaryInput] = useSessionState('data-excel-binary-input', '');
+  const [excelBinaryOutput, setExcelBinaryOutput] = useSessionState('data-excel-binary-output', '');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleGenerateUUID = (count: number = 1) => {
     const newUuids = Array.from({ length: count }, () => generateUUID());
@@ -124,6 +131,42 @@ export const DataUtilities = ({ onCopy }: DataUtilitiesProps) => {
   const handleHash = async () => {
     const hash = await generateHash(hashInput, hashAlgo);
     setHashOutput(hash);
+  };
+
+  const handleExcelToBinary = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const binaryString = await excelToBinaryString(file);
+      setExcelBinaryOutput(binaryString);
+      onCopy('Converted to Binary');
+    } catch (error) {
+      onCopy('Conversion failed');
+    }
+  };
+
+  const handleBinaryToExcel = () => {
+    try {
+      const blob = binaryStringToBlob(excelBinaryInput);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'converted.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      onCopy('Downloaded Excel file');
+    } catch (error) {
+      onCopy('Conversion failed');
+    }
+  };
+
+  const handleClearExcelBinary = () => {
+    setExcelBinaryOutput('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -376,6 +419,55 @@ export const DataUtilities = ({ onCopy }: DataUtilitiesProps) => {
                  </div>
                )}
              </div>
+        </Container>
+
+        <Container title="Excel <-> Binary Converter" icon={FileSpreadsheet} colorClass="text-green-600">
+           <div className="grid grid-cols-2 gap-4">
+             {/* Excel to Binary */}
+             <div>
+                <label className="block text-sm text-slate-500 mb-2">Excel File to Binary</label>
+                <div className="flex items-center justify-center w-full mb-2">
+                    <label htmlFor="excel-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-300 dark:border-slate-600 border-dashed rounded-lg cursor-pointer bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <FileSpreadsheet className="w-8 h-8 mb-3 text-slate-400" />
+                            <p className="mb-2 text-sm text-slate-500 dark:text-slate-400"><span className="font-semibold">Click to upload</span></p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">XLSX or XLS</p>
+                        </div>
+                        <input id="excel-upload" type="file" accept=".xlsx, .xls" className="hidden" onChange={handleExcelToBinary} ref={fileInputRef} />
+                    </label>
+                </div>
+                <div className="h-40 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 border-radius-theme overflow-hidden relative">
+                   <Editor value={excelBinaryOutput} onChange={()=>{}} readOnly language="json" className="border-0" />
+                   {excelBinaryOutput && (
+                      <div className="absolute top-2 right-2 flex gap-1">
+                        <Button onClick={() => { navigator.clipboard.writeText(excelBinaryOutput); onCopy('Copied'); }} size="sm" variant="ghost">
+                            <Copy className="w-4 h-4" />
+                        </Button>
+                        <Button onClick={handleClearExcelBinary} size="sm" variant="ghost" className="text-red-500 hover:text-red-600">
+                            <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                   )}
+                </div>
+             </div>
+
+             {/* Binary to Excel */}
+             <div>
+                <label className="block text-sm text-slate-500 mb-2">Binary String to Excel</label>
+                <div className="h-[19.5rem] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 border-radius-theme overflow-hidden mb-2">
+                    <Editor 
+                        value={excelBinaryInput} 
+                        onChange={setExcelBinaryInput} 
+                        placeholder="80, 75, 3, 4..." 
+                        language="text" 
+                        className="border-0" 
+                    />
+                </div>
+                 <Button onClick={handleBinaryToExcel} variant="primary" size="sm" className="w-full" disabled={!excelBinaryInput}>
+                   Download Excel
+                 </Button>
+             </div>
+           </div>
         </Container>
 
     </div>

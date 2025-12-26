@@ -150,3 +150,44 @@ export const generateHash = async (message: string, algorithm: 'SHA-1' | 'SHA-25
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 };
+
+export const excelToBinaryString = async (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        // Convert to standard array for cleaner JSON stringification if requested, 
+        // or just comma separated string: "1,2,3..."
+        // The user asked for "[80,75...]" or "80,75,3..."
+        // Let's provide a JSON array string as it's safer and requested format example was [80...].
+        // But the user also said "comma separated bytes" in my plan interpretation.
+        // Let's stick to the user's example: "[80,75...]" which is JSON.stringify(Array.from(data))
+        resolve(JSON.stringify(Array.from(data)));
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = (error) => reject(error);
+    reader.readAsArrayBuffer(file);
+  });
+};
+
+export const binaryStringToBlob = (input: string): Blob => {
+  let cleanInput = input.trim();
+
+  // Handle [1,2,3] format
+  if (cleanInput.startsWith('[') && cleanInput.endsWith(']')) {
+    cleanInput = cleanInput.slice(1, -1);
+  }
+
+  // Split by comma and convert to numbers
+  const bytes = cleanInput.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+  const u8 = new Uint8Array(bytes);
+
+  // Create workbook from data to verify it's valid xlsx or just return the blob?
+  // The user asked to convert "binary data ... to excel file". 
+  // This implies the binary data IS the excel file bytes.
+  // So we just return the Blob of type xlsx.
+  return new Blob([u8], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+};
