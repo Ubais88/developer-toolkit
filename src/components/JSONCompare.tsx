@@ -2,7 +2,7 @@ import { useRef, useEffect } from 'react';
 import { useSessionState } from '../hooks/useSessionState';
 import { DiffEditor, MonacoDiffEditor, useMonaco } from '@monaco-editor/react';
 import { Button } from './Button';
-import { FileJson, ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Wand2 } from 'lucide-react';
 import { formatJSON } from '../utils/jsonUtils';
 import { useTheme } from '../context/ThemeContext';
 
@@ -15,7 +15,7 @@ export const JSONCompare = ({ onCopy }: JSONCompareProps) => {
   const monaco = useMonaco();
   const [original, setOriginal] = useSessionState('json-compare-original', '');
   const [modified, setModified] = useSessionState('json-compare-modified', '');
-  
+
   const diffEditorRef = useRef<MonacoDiffEditor | null>(null);
   const widgetsRef = useRef<any[]>([]);
 
@@ -56,214 +56,124 @@ export const JSONCompare = ({ onCopy }: JSONCompareProps) => {
 
   useEffect(() => {
     if (!monaco || !diffEditorRef.current) return;
-
     const diffEditor = diffEditorRef.current;
-    
-    // Function to apply changes from one side to the other
+
+    // ... Existing widget logic (kept for functionality but could be stylized if needed) ...
+    // For brevity in this redesign, keeping core logic if possible or assuming it works.
+    // I will include the widget logic to ensure functionality is preserved.
+
     const applyChange = (change: any, direction: 'L2R' | 'R2L') => {
-       const originalEditor = diffEditor.getOriginalEditor();
-       const modifiedEditor = diffEditor.getModifiedEditor();
-       const originalModel = originalEditor.getModel();
-       const modifiedModel = modifiedEditor.getModel();
+      const originalEditor = diffEditor.getOriginalEditor();
+      const modifiedEditor = diffEditor.getModifiedEditor();
+      const originalModel = originalEditor.getModel();
+      const modifiedModel = modifiedEditor.getModel();
+      if (!originalModel || !modifiedModel) return;
 
-       if (!originalModel || !modifiedModel) return;
-
-       if (direction === 'L2R') {
-         // Taking content from Original (Left) and putting into Modified (Right)
-         let text = '';
-         // Check if original range has content
-         if (change.originalEndLineNumber >= change.originalStartLineNumber) {
-            const range = new monaco.Range(
-               change.originalStartLineNumber, 
-               1, 
-               change.originalEndLineNumber, 
-               originalModel.getLineMaxColumn(change.originalEndLineNumber)
-            );
-            text = originalModel.getValueInRange(range);
-         }
-
-         if (change.modifiedEndLineNumber >= change.modifiedStartLineNumber) {
-            const range = new monaco.Range(
-              change.modifiedStartLineNumber,
-              1,
-              change.modifiedEndLineNumber,
-              modifiedModel.getLineMaxColumn(change.modifiedEndLineNumber)
-            );
-            modifiedEditor.executeEdits('diff', [{ range, text, forceMoveMarkers: true }]);
-         } else {
-             const range = new monaco.Range(
-               change.modifiedStartLineNumber,
-               1,
-               change.modifiedStartLineNumber,
-               1
-             );
-             modifiedEditor.executeEdits('diff', [{ range, text: text.trimEnd() + (text ? '\n' : ''), forceMoveMarkers: true }]);
-         }
-       } else {
-         // R2L: Take Modified (Right) -> Original (Left)
-         let text = '';
-         if (change.modifiedEndLineNumber >= change.modifiedStartLineNumber) {
-            const range = new monaco.Range(
-              change.modifiedStartLineNumber,
-              1,
-              change.modifiedEndLineNumber,
-              modifiedModel.getLineMaxColumn(change.modifiedEndLineNumber)
-            );
-            text = modifiedModel.getValueInRange(range);
-         }
-
-         if (change.originalEndLineNumber >= change.originalStartLineNumber) {
-            const range = new monaco.Range(
-              change.originalStartLineNumber,
-              1,
-              change.originalEndLineNumber,
-              originalModel.getLineMaxColumn(change.originalEndLineNumber)
-            );
-            originalEditor.executeEdits('diff', [{ range, text, forceMoveMarkers: true }]);
-         } else {
-            const range = new monaco.Range(
-               change.originalStartLineNumber,
-               1,
-               change.originalStartLineNumber,
-               1
-            );
-            originalEditor.executeEdits('diff', [{ range, text: text.trimEnd() + (text ? '\n' : ''), forceMoveMarkers: true }]);
-         }
-       }
+      if (direction === 'L2R') {
+        let text = '';
+        if (change.originalEndLineNumber >= change.originalStartLineNumber) {
+          const range = new monaco.Range(change.originalStartLineNumber, 1, change.originalEndLineNumber, originalModel.getLineMaxColumn(change.originalEndLineNumber));
+          text = originalModel.getValueInRange(range);
+        }
+        if (change.modifiedEndLineNumber >= change.modifiedStartLineNumber) {
+          const range = new monaco.Range(change.modifiedStartLineNumber, 1, change.modifiedEndLineNumber, modifiedModel.getLineMaxColumn(change.modifiedEndLineNumber));
+          modifiedEditor.executeEdits('diff', [{ range, text, forceMoveMarkers: true }]);
+        } else {
+          const range = new monaco.Range(change.modifiedStartLineNumber, 1, change.modifiedStartLineNumber, 1);
+          modifiedEditor.executeEdits('diff', [{ range, text: text.trimEnd() + (text ? '\n' : ''), forceMoveMarkers: true }]);
+        }
+      } else {
+        let text = '';
+        if (change.modifiedEndLineNumber >= change.modifiedStartLineNumber) {
+          const range = new monaco.Range(change.modifiedStartLineNumber, 1, change.modifiedEndLineNumber, modifiedModel.getLineMaxColumn(change.modifiedEndLineNumber));
+          text = modifiedModel.getValueInRange(range);
+        }
+        if (change.originalEndLineNumber >= change.originalStartLineNumber) {
+          const range = new monaco.Range(change.originalStartLineNumber, 1, change.originalEndLineNumber, originalModel.getLineMaxColumn(change.originalEndLineNumber));
+          originalEditor.executeEdits('diff', [{ range, text, forceMoveMarkers: true }]);
+        } else {
+          const range = new monaco.Range(change.originalStartLineNumber, 1, change.originalStartLineNumber, 1);
+          originalEditor.executeEdits('diff', [{ range, text: text.trimEnd() + (text ? '\n' : ''), forceMoveMarkers: true }]);
+        }
+      }
     };
 
     const updateWidgets = () => {
-       // Clear old widgets
-       widgetsRef.current.forEach(w => {
-          diffEditor.getOriginalEditor().removeContentWidget(w);
-          diffEditor.getModifiedEditor().removeContentWidget(w);
-       });
-       widgetsRef.current = [];
+      widgetsRef.current.forEach(w => {
+        diffEditor.getOriginalEditor().removeContentWidget(w);
+        diffEditor.getModifiedEditor().removeContentWidget(w);
+      });
+      widgetsRef.current = [];
+      const changes = diffEditor.getLineChanges() || [];
+      changes.forEach((change, idx) => {
+        const l2rBtn = document.createElement('div');
+        l2rBtn.innerHTML = '→';
+        l2rBtn.className = 'cursor-pointer bg-primary/10 hover:bg-primary/20 text-primary rounded px-1 text-xs font-bold border border-primary/20 z-50 backdrop-blur-sm';
+        l2rBtn.onclick = (e) => { e.stopPropagation(); applyChange(change, 'L2R'); };
+        const l2rWidget = { getId: () => `l2r-${idx}`, getDomNode: () => l2rBtn, getPosition: () => ({ position: { lineNumber: Math.max(change.originalStartLineNumber, 1), column: 1 }, preference: [monaco.editor.ContentWidgetPositionPreference.EXACT] }) };
+        diffEditor.getOriginalEditor().addContentWidget(l2rWidget);
+        widgetsRef.current.push(l2rWidget);
 
-       const changes = diffEditor.getLineChanges() || [];
-       
-       changes.forEach((change, idx) => {
-          // L -> R Button (Overlay on Original)
-          const l2rBtn = document.createElement('div');
-          l2rBtn.innerHTML = '→';
-          l2rBtn.className = 'cursor-pointer bg-blue-100 hover:bg-blue-200 text-blue-700 rounded px-1 text-xs font-bold border border-blue-300 z-50';
-          l2rBtn.title = 'Copy to Right';
-          l2rBtn.onclick = (e) => { e.stopPropagation(); applyChange(change, 'L2R'); };
-          
-          const l2rWidget = {
-             getId: () => `l2r-${idx}`,
-             getDomNode: () => l2rBtn,
-             getPosition: () => ({
-                position: {
-                   lineNumber: Math.max(change.originalStartLineNumber, 1),
-                   column: 1
-                },
-                preference: [monaco.editor.ContentWidgetPositionPreference.EXACT]
-             })
-          };
-          diffEditor.getOriginalEditor().addContentWidget(l2rWidget);
-          widgetsRef.current.push(l2rWidget);
-
-          // R -> L Button (Overlay on Modified)
-          const r2lBtn = document.createElement('div');
-          r2lBtn.innerHTML = '←';
-          r2lBtn.className = 'cursor-pointer bg-blue-100 hover:bg-blue-200 text-blue-700 rounded px-1 text-xs font-bold border border-blue-300 z-50';
-          r2lBtn.title = 'Copy to Left';
-          r2lBtn.onclick = (e) => { e.stopPropagation(); applyChange(change, 'R2L'); };
-          
-          const r2lWidget = {
-             getId: () => `r2l-${idx}`,
-             getDomNode: () => r2lBtn,
-             getPosition: () => ({
-                position: {
-                   lineNumber: Math.max(change.modifiedStartLineNumber, 1),
-                   column: 1
-                },
-                preference: [monaco.editor.ContentWidgetPositionPreference.EXACT]
-             })
-          };
-          diffEditor.getModifiedEditor().addContentWidget(r2lWidget);
-          widgetsRef.current.push(r2lWidget);
-       });
-    };
-
-    const disposable = diffEditor.onDidUpdateDiff(updateWidgets);
-    // Initial run
-    setTimeout(updateWidgets, 100);
-
-    return () => {
-      disposable.dispose();
-      widgetsRef.current.forEach(() => {
-         // Cleanup
+        const r2lBtn = document.createElement('div');
+        r2lBtn.innerHTML = '←';
+        r2lBtn.className = 'cursor-pointer bg-primary/10 hover:bg-primary/20 text-primary rounded px-1 text-xs font-bold border border-primary/20 z-50 backdrop-blur-sm';
+        r2lBtn.onclick = (e) => { e.stopPropagation(); applyChange(change, 'R2L'); };
+        const r2lWidget = { getId: () => `r2l-${idx}`, getDomNode: () => r2lBtn, getPosition: () => ({ position: { lineNumber: Math.max(change.modifiedStartLineNumber, 1), column: 1 }, preference: [monaco.editor.ContentWidgetPositionPreference.EXACT] }) };
+        diffEditor.getModifiedEditor().addContentWidget(r2lWidget);
+        widgetsRef.current.push(r2lWidget);
       });
     };
-  }, [monaco]); 
+    const disposable = diffEditor.onDidUpdateDiff(updateWidgets);
+    setTimeout(updateWidgets, 100);
+    return () => { disposable.dispose(); };
+  }, [monaco]);
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900">
-      <div className="flex-shrink-0 border-b border-gray-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-800 shadow-sm z-10">
-        <div className="flex gap-3">
-          <Button onClick={handleFormat} variant="secondary" size="sm">
-            <FileJson className="w-4 h-4" />
-            Format Both
-          </Button>
-          <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 my-auto mx-2" />
-          <Button onClick={handleCopyLeftToRight} variant="ghost" size="sm" title="Copy Left to Right">
-            <span className="mr-2">Left</span>
-            <ArrowRight className="w-4 h-4" />
-            <span className="ml-2">Right</span>
-          </Button>
-          <Button onClick={handleCopyRightToLeft} variant="ghost" size="sm" title="Copy Right to Left">
-            <span className="mr-2">Left</span>
-            <ArrowLeft className="w-4 h-4" />
-            <span className="ml-2">Right</span>
-          </Button>
-          <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center ml-2">
-            Auto-comparison active. Edit either side.
-          </span>
-        </div>
+    <div className="flex flex-col h-full bg-transparent relative group">
+      {/* Tools Layer */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 p-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-full shadow-lg transition-all opacity-100 ring-1 ring-black/5">
+        <Button onClick={handleCopyLeftToRight} variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0" title="Copy Left to Right">
+          <ArrowRight className="w-4 h-4 text-slate-500 hover:text-primary transition-colors" />
+        </Button>
+        <div className="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
+        <Button onClick={handleFormat} variant="ghost" size="sm" className="gap-2 px-3 rounded-full text-slate-600 dark:text-slate-300">
+          <Wand2 className="w-4 h-4 text-primary" />
+          <span className="text-xs font-semibold">Format Both</span>
+        </Button>
+        <div className="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
+        <Button onClick={handleCopyRightToLeft} variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0" title="Copy Right to Left">
+          <ArrowLeft className="w-4 h-4 text-slate-500 hover:text-primary transition-colors" />
+        </Button>
       </div>
 
-      <div className="flex-1 min-h-0 bg-white dark:bg-slate-900 p-4">
-        <div className="h-full border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden relative group">
-             {/* Small style tweak for widgets */}
-             <style>{`
-               .monaco-editor .content-widget { z-index: 100; }
-             `}</style>
-             <DiffEditor
-                height="100%"
-                language="json"
-                original={original}
-                modified={modified}
-                theme={mode === 'dark' ? 'vs-dark' : 'light'}
-                onMount={(editor) => {
-                  diffEditorRef.current = editor;
-                  const originalModel = editor.getOriginalEditor().getModel();
-                  const modifiedModel = editor.getModifiedEditor().getModel();
-                  
-                  // Sync editor changes to state for persistence
-                  if (originalModel) {
-                     originalModel.onDidChangeContent(() => {
-                         setOriginal(originalModel.getValue());
-                     });
-                  }
-                  if (modifiedModel) {
-                     modifiedModel.onDidChangeContent(() => {
-                         setModified(modifiedModel.getValue());
-                     });
-                  }
-                }}
-                options={{
-                  originalEditable: true,
-                  renderSideBySide: true,
-                  minimap: { enabled: false },
-                  scrollBeyondLastLine: false,
-                  fontSize: 14,
-                  fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
-                  padding: { top: 16, bottom: 16 },
-                }}
-             />
-        </div>
+      <div className="flex-1 min-h-0 bg-transparent rounded-2xl overflow-hidden relative">
+        <style>{`
+             .monaco-editor .content-widget { z-index: 100; }
+           `}</style>
+        <DiffEditor
+          height="100%"
+          language="json"
+          original={original}
+          modified={modified}
+          theme={mode === 'dark' ? 'vs-dark' : 'light'}
+          onMount={(editor) => {
+            diffEditorRef.current = editor;
+            const originalModel = editor.getOriginalEditor().getModel();
+            const modifiedModel = editor.getModifiedEditor().getModel();
+            if (originalModel) originalModel.onDidChangeContent(() => setOriginal(originalModel.getValue()));
+            if (modifiedModel) modifiedModel.onDidChangeContent(() => setModified(modifiedModel.getValue()));
+          }}
+          options={{
+            originalEditable: true,
+            renderSideBySide: true,
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            fontSize: 13,
+            fontFamily: "'JetBrains Mono', 'Inter', monospace",
+            padding: { top: 24, bottom: 24 },
+            renderOverviewRuler: false,
+          }}
+        />
       </div>
     </div>
   );
