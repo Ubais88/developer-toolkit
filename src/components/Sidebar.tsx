@@ -1,4 +1,4 @@
-import { X, ChevronRight } from 'lucide-react';
+import { ChevronsRight } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { Logo } from './Logo';
 
@@ -11,87 +11,65 @@ interface SidebarProps {
 export const Sidebar = ({ isOpen, onToggle, tabs }: SidebarProps) => {
   return (
     <aside
-      className={`fixed top-0 left-0 h-screen bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transition-all duration-300 z-40 flex flex-col ${
-        isOpen ? 'w-64' : 'w-16'
-      }`}
+      className={`fixed top-4 left-4 bottom-4 z-40 flex flex-col transition-all duration-300 ease-in-out font-sans 
+        ${isOpen ? 'w-72' : 'w-20'}
+        glass rounded-2xl border border-white/20 dark:border-white/5
+      `}
     >
-      <div className="h-14 flex items-center px-4 border-b border-slate-100 dark:border-slate-700 font-sans relative">
-        <div className="flex items-center gap-3 overflow-hidden whitespace-nowrap">
-           <Logo className="w-8 h-8 text-primary flex-shrink-0 transition-transform duration-300" />
-           <div className={`flex flex-col bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent transition-all duration-300 ${isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 w-0'}`}>
-            <span className="text-lg font-bold leading-tight">
-              Ghost Toolkit
+      {/* Header */}
+      <div className="h-20 flex items-center px-6 mb-2">
+        <div className="flex items-center gap-4 overflow-hidden whitespace-nowrap w-full">
+          <div className={`flex-shrink-0 transition-transform duration-300 ${isOpen ? '' : 'mx-auto'}`}>
+            <Logo className="w-10 h-10 text-primary drop-shadow-sm" />
+          </div>
+
+          <div className={`flex flex-col transition-all duration-300 ${isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10 w-0 absolute'}`}>
+            <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Ghost<span className="text-primary">ToolKit</span>
             </span>
-            <span className="text-[10px] font-medium text-slate-400 tracking-wider">
-              Mohd Ubais
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+              Pro Suite
             </span>
           </div>
         </div>
-
-        {/* Close Button */}
-        <button
-          onClick={onToggle}
-          className={`ml-auto p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-all duration-300 ${isOpen ? 'opacity-100 rotate-0' : 'opacity-0 rotate-180 pointer-events-none absolute right-4'}`}
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        {/* Open Button (Floating) */}
-        <button
-          onClick={onToggle}
-          className={`absolute -right-3 top-1/2 -translate-y-1/2 p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full shadow-sm hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 z-50 transition-all duration-300 ${!isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-0 pointer-events-none'}`}
-          title="Open Sidebar"
-        >
-          <ChevronRight className="w-3 h-3" />
-        </button>
       </div>
-      
-      {/* If closed, show toggle button in a different way or rely on footer/shortcut? 
-          The original code had the button inside the header flex. 
-          If closed (w-16), checking the existing code:
-          It rendered <span className="mx-auto ...">GT</span> and the button next to it? 
-          Wait, justify-between.
-          If w-16, "GT" takes space, toggle takes space.
-          The toggle was X or ChevronRight.
-          If I put Logo in center for closed state, where does the toggle go?
-          Typically a small sidebar has the toggle at bottom or top.
-          The user's code had:
-          header { flex justify-between }
-          if !isOpen { <GT /> } <Button />
-          So GT and Button were side-by-side or squashed in w-16?
-          w-16 is 4rem (64px). 
-          GT text and a wrapper button.
-          I will keep the button logic but maybe make it cleaner.
-      */}
 
-      <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
+      {/* Navigation */}
+      <nav className="flex-1 px-4 space-y-2 overflow-y-auto no-scrollbar">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const path = tab.id === 'json' ? '/' : `/${tab.id}`;
-          
+
           return (
             <NavLink
               key={tab.id}
               to={path}
-              className={({ isActive }) => `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg group transition-all duration-200 ${
-                isActive
-                  ? 'bg-primary-light text-primary'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100'
-              } ${!isOpen && 'justify-center'}`}
+              className={({ isActive }) => `
+                relative flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 group
+                ${isActive
+                  ? 'bg-primary text-white shadow-md shadow-primary/25'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                }
+                ${!isOpen && 'justify-center px-2'}
+              `}
               title={!isOpen ? tab.label : undefined}
             >
               {({ isActive }) => (
                 <>
-                  <div
-                    className={`${
-                      isActive
-                        ? 'text-primary'
-                        : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
+                  <div className={`flex-shrink-0 transition-transform duration-200 ${!isOpen && 'group-hover:scale-110'}`}>
+                    <Icon className={`w-6 h-6 ${isActive ? 'text-white' : ''}`} strokeWidth={2} />
                   </div>
-                  {isOpen && <span className="font-medium text-sm whitespace-nowrap">{tab.label}</span>}
+
+                  {isOpen && (
+                    <span className="font-medium text-[15px] truncate">
+                      {tab.label}
+                    </span>
+                  )}
+
+                  {/* Active Indicator Pille for closed state */}
+                  {!isOpen && isActive && (
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-l-full" />
+                  )}
                 </>
               )}
             </NavLink>
@@ -99,16 +77,26 @@ export const Sidebar = ({ isOpen, onToggle, tabs }: SidebarProps) => {
         })}
       </nav>
 
-      {isOpen && (
-        <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
-          <div className="text-xs text-slate-400 flex items-center gap-2 justify-center">
-            <kbd className="px-2 py-1 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 shadow-sm font-mono text-[10px]">
-              Ctrl+K
-            </kbd>
-            <span>to cycle tabs</span>
-          </div>
-        </div>
-      )}
+      {/* Footer / Toggle */}
+      <div className="p-4 mt-auto">
+        <button
+          onClick={onToggle}
+          className={`
+            w-full flex items-center justify-center p-3 rounded-xl transition-all duration-200
+            hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white
+            ${!isOpen && 'aspect-square'}
+          `}
+        >
+          {isOpen ? (
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <ChevronsRight className="w-5 h-5 rotate-180" />
+              <span>Collapse Sidebar</span>
+            </div>
+          ) : (
+            <ChevronsRight className="w-6 h-6" />
+          )}
+        </button>
+      </div>
     </aside>
   );
 };

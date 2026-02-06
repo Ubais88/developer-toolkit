@@ -33,7 +33,7 @@ export const Editor = ({
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     // Add custom keybinding or actions if needed
     // Example: Trigger format on load? No, let's keep it simple.
-    
+
     if (highlightError) {
       // Logic to scroll to error could go here, but Monaco handles errors via markers usually.
       // We can manually reveal the line.
@@ -42,7 +42,7 @@ export const Editor = ({
   };
 
   return (
-    <div className={`h-full w-full overflow-hidden rounded-md border border-gray-200 bg-white dark:bg-slate-900 ${className}`}>
+    <div className={`h-full w-full overflow-hidden rounded-md ${className}`}>
       <MonacoEditor
         height="100%"
         defaultLanguage={language}
