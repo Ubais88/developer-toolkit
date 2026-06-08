@@ -10,6 +10,8 @@ interface EditorProps {
   highlightError?: number;
   placeholder?: string;
   highlightLines?: Set<number>;
+  zenMode?: boolean;
+  path?: string; // Used to separate Monaco Editor models natively (undo/redo, state)
 }
 
 export const Editor = ({
@@ -22,7 +24,9 @@ export const Editor = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   placeholder,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  highlightLines
+  highlightLines,
+  zenMode = false,
+  path
 }: EditorProps) => {
   const { mode } = useTheme();
 
@@ -44,6 +48,7 @@ export const Editor = ({
   return (
     <div className={`h-full w-full overflow-hidden rounded-md ${className}`}>
       <MonacoEditor
+        path={path}
         height="100%"
         defaultLanguage={language}
         language={language}

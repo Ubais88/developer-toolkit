@@ -1,19 +1,31 @@
-import { ChevronsRight } from 'lucide-react';
+import { ChevronsRight, FileJson, GitCompare, Database, FileCode, Split, Settings, Palette, Github, Bell, Link as LinkIcon } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { Logo } from './Logo';
+import { ThemeToggle } from './ThemeToggle';
+
+const ICONS: Record<string, any> = {
+  'json': FileJson,
+  'compare': GitCompare,
+  'url-modifier': LinkIcon,
+  'sql-compare': Database,
+  'sql-helper': FileCode,
+  'data': Settings,
+  'comma': Split,
+  'theme': Palette,
+};
 
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
-  tabs: { id: string; label: string; icon: any }[];
+  tabs: { id: string; label: string; path: string }[];
 }
 
 export const Sidebar = ({ isOpen, onToggle, tabs }: SidebarProps) => {
   return (
     <aside
-      className={`fixed top-4 left-4 bottom-4 z-40 flex flex-col transition-all duration-300 ease-in-out font-sans 
-        ${isOpen ? 'w-72' : 'w-20'}
-        glass rounded-2xl border border-white/20 dark:border-white/5
+      className={`fixed top-0 left-0 bottom-0 z-40 flex flex-col transition-all duration-150 ease-out font-sans 
+        ${isOpen ? 'w-64' : 'w-16'}
+        bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-white/5
       `}
     >
       {/* Header */}
@@ -23,8 +35,8 @@ export const Sidebar = ({ isOpen, onToggle, tabs }: SidebarProps) => {
             <Logo className="w-10 h-10 text-primary drop-shadow-sm" />
           </div>
 
-          <div className={`flex flex-col transition-all duration-300 ${isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10 w-0 absolute'}`}>
-            <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <div className={`flex flex-col transition-all duration-150 ${isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10 w-0 absolute'}`}>
+            <span className="text-[17px] font-bold tracking-tight text-slate-900 dark:text-white">
               Ghost<span className="text-primary">ToolKit</span>
             </span>
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
@@ -35,40 +47,40 @@ export const Sidebar = ({ isOpen, onToggle, tabs }: SidebarProps) => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 space-y-2 overflow-y-auto no-scrollbar">
+      <nav className="flex-1 px-3 space-y-1 overflow-y-auto no-scrollbar">
         {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const path = tab.id === 'json' ? '/' : `/${tab.id}`;
+          const Icon = ICONS[tab.id] || Settings;
+          const path = tab.path;
 
           return (
             <NavLink
               key={tab.id}
               to={path}
               className={({ isActive }) => `
-                relative flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 group
+                relative flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-150 group
                 ${isActive
-                  ? 'bg-primary text-white shadow-md shadow-primary/25'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-primary/10 text-primary dark:bg-white/10 dark:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
                 }
-                ${!isOpen && 'justify-center px-2'}
+                ${!isOpen && 'justify-center px-0'}
               `}
               title={!isOpen ? tab.label : undefined}
             >
               {({ isActive }) => (
                 <>
-                  <div className={`flex-shrink-0 transition-transform duration-200 ${!isOpen && 'group-hover:scale-110'}`}>
-                    <Icon className={`w-6 h-6 ${isActive ? 'text-white' : ''}`} strokeWidth={2} />
+                  <div className={`flex-shrink-0 transition-transform duration-150 ${!isOpen && 'group-hover:scale-110'}`}>
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-primary dark:text-white' : 'opacity-80'}`} strokeWidth={2} />
                   </div>
 
                   {isOpen && (
-                    <span className="font-medium text-[15px] truncate">
+                    <span className="font-medium text-sm truncate">
                       {tab.label}
                     </span>
                   )}
 
                   {/* Active Indicator Pille for closed state */}
                   {!isOpen && isActive && (
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-l-full" />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-primary dark:bg-white rounded-r-full" />
                   )}
                 </>
               )}
@@ -78,22 +90,39 @@ export const Sidebar = ({ isOpen, onToggle, tabs }: SidebarProps) => {
       </nav>
 
       {/* Footer / Toggle */}
-      <div className="p-4 mt-auto">
+      <div className="mt-auto border-t border-slate-200 dark:border-white/5 flex flex-col p-2 gap-1">
+        {isOpen && (
+          <div className="flex items-center justify-between px-2 py-2 mb-1">
+            <div className="flex items-center gap-2">
+              <a href="https://github.com/ubais88" target="_blank" rel="noreferrer" className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors p-1.5 rounded-md hover:bg-slate-200 dark:hover:bg-white/5">
+                <Github className="w-4 h-4" />
+              </a>
+              <button className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors p-1.5 rounded-md hover:bg-slate-200 dark:hover:bg-white/5">
+                <Bell className="w-4 h-4" />
+              </button>
+            </div>
+            <ThemeToggle />
+          </div>
+        )}
+        
         <button
           onClick={onToggle}
           className={`
-            w-full flex items-center justify-center p-3 rounded-xl transition-all duration-200
-            hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white
+            w-full flex items-center justify-center p-2 rounded-lg transition-colors duration-150
+            hover:bg-slate-200 dark:hover:bg-white/5 text-slate-500 hover:text-slate-900 dark:hover:text-white
             ${!isOpen && 'aspect-square'}
           `}
         >
           {isOpen ? (
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <ChevronsRight className="w-5 h-5 rotate-180" />
-              <span>Collapse Sidebar</span>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider">
+              <ChevronsRight className="w-4 h-4 rotate-180" />
+              <span>Collapse</span>
             </div>
           ) : (
-            <ChevronsRight className="w-6 h-6" />
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-full h-px bg-slate-200 dark:bg-white/5 mb-2" />
+              <ChevronsRight className="w-4 h-4" />
+            </div>
           )}
         </button>
       </div>
