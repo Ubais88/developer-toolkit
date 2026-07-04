@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { JSONTabs, TabData } from './JSONTabs';
 import { Editor } from './Editor';
@@ -44,6 +44,7 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
   const [isTreeView, setIsTreeView] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showThemeMenu, setShowThemeMenu] = useState(false);
+  const [cursorPos, setCursorPos] = useState({ line: 1, column: 1 });
   const containerRef = useRef<HTMLDivElement>(null);
   const themeMenuRef = useRef<HTMLDivElement>(null);
   
@@ -71,8 +72,62 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
     }
   }, [tabs, activeTabId, setTabs, setActiveTabId]);
 
+  // Reset cursor position when changing tabs
+  useEffect(() => {
+    setCursorPos({ line: 1, column: 1 });
+  }, [activeTabId]);
+
   const activeTab = tabs?.find(t => t.id === activeTabId) || tabs?.[0] || defaultTab;
   const input = activeTab.content;
+
+  const jsonStats = useMemo(() => {
+    if (!input) return { valid: true, error: null, line: null, keys: 0, depth: 0 };
+    const validation = validateJSON(input);
+    if (!validation.valid) {
+      return { valid: false, error: validation.error, line: validation.line, keys: 0, depth: 0 };
+    }
+    try {
+      const parsed = JSON.parse(input);
+      
+      const countKeys = (obj: any): number => {
+        if (obj === null || typeof obj !== 'object') return 0;
+        let count = 0;
+        if (Array.isArray(obj)) {
+          for (const item of obj) {
+            count += countKeys(item);
+          }
+        } else {
+          const keys = Object.keys(obj);
+          count += keys.length;
+          for (const key of keys) {
+            count += countKeys(obj[key]);
+          }
+        }
+        return count;
+      };
+
+      const getJsonDepth = (obj: any): number => {
+        if (obj === null || typeof obj !== 'object') return 0;
+        if (Array.isArray(obj)) {
+          if (obj.length === 0) return 1;
+          return 1 + Math.max(...obj.map(getJsonDepth));
+        }
+        const keys = Object.keys(obj);
+        if (keys.length === 0) return 1;
+        return 1 + Math.max(...keys.map(k => getJsonDepth(obj[k])));
+      };
+
+      return {
+        valid: true,
+        error: null,
+        line: null,
+        keys: countKeys(parsed),
+        depth: getJsonDepth(parsed)
+      };
+    } catch (_e) {
+      return { valid: false, error: 'Invalid JSON structure', line: null, keys: 0, depth: 0 };
+    }
+  }, [input]);
 
   const setInput = (newContent: string) => {
     setTabs(prev => prev.map(t => 
@@ -506,6 +561,13 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
     </div>
   );
 
+  const getByteSize = (str: string) => {
+    if (!str) return '0 B';
+    const bytes = new Blob([str]).size;
+    if (bytes < 1024) return `${bytes} B`;
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  };
+
   return (
     <div 
       ref={containerRef}
@@ -548,8 +610,40 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
               onChange={setInput}
               language="json"
               className="h-full font-mono text-sm"
+              onCursorChange={(line, col) => setCursorPos({ line, column: col })}
             />
           )}
+        </div>
+
+        {/* Subtle developer info footer */}
+        <div className="h-[26px] flex-shrink-0 px-3 bg-slate-50/50 dark:bg-slate-950/40 border-t border-slate-200 dark:border-white/5 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 select-none font-sans font-medium">
+          <div className="flex items-center gap-3">
+            <span className="opacity-90">{activeTab.name}</span>
+          </div>
+
+          <div className="flex items-center gap-3 opacity-90">
+            <span>{isTreeView ? 'JSON (Tree)' : 'JSON'}</span>
+            <span className="text-slate-200 dark:text-slate-800/80">|</span>
+            <span>UTF-8</span>
+            <span className="text-slate-200 dark:text-slate-800/80">|</span>
+            <span>Ln {cursorPos.line}:{cursorPos.column}</span>
+            <span className="text-slate-200 dark:text-slate-800/80">|</span>
+            <span>{getByteSize(input)}</span>
+            <span className="text-slate-200 dark:text-slate-800/80">|</span>
+            <span>{jsonStats.valid ? `${jsonStats.keys} Keys` : '0 Keys'}</span>
+            <span className="text-slate-200 dark:text-slate-800/80">|</span>
+            <span>Depth {jsonStats.valid ? jsonStats.depth : '0'}</span>
+            <span className="text-slate-200 dark:text-slate-800/80">|</span>
+            {jsonStats.valid ? (
+              <span className="text-emerald-500 dark:text-emerald-400 flex items-center gap-0.5">
+                ✓ Valid
+              </span>
+            ) : (
+              <span className="text-rose-500 dark:text-rose-400 flex items-center gap-0.5 font-semibold animate-pulse">
+                ✗ Invalid {jsonStats.line ? `(Line ${jsonStats.line})` : ''}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </div>

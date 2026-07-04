@@ -13,6 +13,7 @@ interface EditorProps {
   highlightLines?: Set<number>;
   zenMode?: boolean;
   path?: string; // Used to separate Monaco Editor models natively (undo/redo, state)
+  onCursorChange?: (line: number, column: number) => void;
 }
 
 export const Editor = ({
@@ -22,7 +23,8 @@ export const Editor = ({
   className = '',
   language = 'json',
   highlightError,
-  path
+  path,
+  onCursorChange
 }: EditorProps) => {
   const { mode, basePalette } = useTheme();
   const monacoRef = useRef<any>(null);
@@ -33,6 +35,13 @@ export const Editor = ({
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     monacoRef.current = monaco;
+    
+    // Listen for cursor position changes
+    editor.onDidChangeCursorPosition((e) => {
+      if (onCursorChange) {
+        onCursorChange(e.position.lineNumber, e.position.column);
+      }
+    });
     
     if (highlightError) {
       editor.revealLineInCenter(highlightError);
