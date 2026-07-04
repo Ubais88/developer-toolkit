@@ -8,7 +8,7 @@ export function ThemeToggle() {
     return (
         <Button
             variant="ghost"
-            size="sm"
+            size="none"
             onClick={() => setMode(mode === 'dark' ? 'light' : 'dark')}
             className="rounded-full w-10 h-10 p-0"
             title={`Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`}

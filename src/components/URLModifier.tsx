@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Copy, ExternalLink, RefreshCw, Plus, Trash2, ArrowRight, Link as LinkIcon, AlertCircle, Info } from 'lucide-react';
-import { Button } from './Button';
 import { useToast } from '../hooks/useToast';
 
 interface ReplacementRule {
@@ -173,7 +172,7 @@ export const URLModifier = () => {
                         <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Transformation Pipeline</label>
                         
                         <div className="flex flex-col gap-1">
-                            {rules.map((rule, idx) => (
+                            {rules.map((rule) => (
                                 <div key={rule.id} className="group flex items-center gap-3 py-1.5 px-3 -mx-3 rounded-md hover:bg-slate-200 dark:hover:bg-white/[0.02] transition-colors border border-transparent focus-within:bg-slate-200 dark:focus-within:bg-white/[0.03] focus-within:border-slate-300 dark:focus-within:border-white/[0.06]">
                                     <div className="flex items-center justify-center w-5">
                                         <input

@@ -13,7 +13,12 @@ import {
   Trash2, 
   Network, 
   Maximize, 
-  Minimize 
+  Minimize,
+  Palette,
+  Check,
+  Sun,
+  Moon,
+  Monitor
 } from 'lucide-react';
 import { formatJSON, minifyJSON, validateJSON, repairJSON } from '../utils/jsonUtils';
 import { JsonView, darkStyles, defaultStyles } from 'react-json-view-lite';
@@ -38,8 +43,22 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
 
   const [isTreeView, setIsTreeView] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showThemeMenu, setShowThemeMenu] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { mode } = useTheme();
+  const themeMenuRef = useRef<HTMLDivElement>(null);
+  
+  const { 
+    mode, 
+    setMode, 
+    primaryColor, 
+    setPrimaryColor, 
+    radius, 
+    setRadius, 
+    glass, 
+    setGlass, 
+    preset, 
+    applyPreset 
+  } = useTheme();
 
   // Safety fallback if tabs are ever empty
   useEffect(() => {
@@ -207,6 +226,17 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
+  // Click outside handler for Appearance settings popup menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (themeMenuRef.current && !themeMenuRef.current.contains(event.target as Node)) {
+        setShowThemeMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -269,66 +299,218 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
     }
   }
 
+  const toolbar = (
+    <div className="flex items-center gap-1">
+      <Button onClick={handleFormat} variant="ghost" size="none" className="relative group/btn w-8 h-8 p-0 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary rounded-md transition-colors">
+        <Wand2 size={16} strokeWidth={1.5} />
+        <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Format JSON (Alt+Shift+F)</span>
+      </Button>
+      
+      <Button onClick={handleMinify} variant="ghost" size="none" className="relative group/btn w-8 h-8 p-0 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary rounded-md transition-colors">
+        <Minimize2 size={16} strokeWidth={1.5} />
+        <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Minify JSON (Alt+Shift+M)</span>
+      </Button>
+      
+      <Button onClick={handleValidate} variant="ghost" size="none" className="relative group/btn w-8 h-8 p-0 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary rounded-md transition-colors">
+        <CheckCircle size={16} strokeWidth={1.5} />
+        <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Validate JSON (Alt+Shift+V)</span>
+      </Button>
+      
+      <Button onClick={handleRepair} variant="ghost" size="none" className="relative group/btn w-8 h-8 p-0 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary rounded-md transition-colors">
+        <Wrench size={16} strokeWidth={1.5} />
+        <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Auto Repair JSON (Alt+Shift+R)</span>
+      </Button>
+      
+      <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1"></div>
+      
+      <Button onClick={handleCopy} variant="ghost" size="none" className="relative group/btn w-8 h-8 p-0 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary rounded-md transition-colors">
+        <Copy size={16} strokeWidth={1.5} />
+        <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Copy JSON (Alt+Shift+C)</span>
+      </Button>
+      
+      <Button onClick={handleDownload} variant="ghost" size="none" className="relative group/btn w-8 h-8 p-0 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary rounded-md transition-colors">
+        <Download size={16} strokeWidth={1.5} />
+        <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Download JSON (Alt+Shift+D)</span>
+      </Button>
+      
+      <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1"></div>
+      
+      <Button onClick={handleClear} variant="ghost" size="none" className="relative group/btn w-8 h-8 p-0 text-red-400 dark:text-red-500 hover:bg-red-500/10 hover:text-red-500 dark:hover:text-red-400 rounded-md transition-colors">
+        <Trash2 size={16} strokeWidth={1.5} />
+        <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Clear Editor (Alt+Shift+X)</span>
+      </Button>
+      
+      <Button onClick={toggleTreeView} variant="ghost" size="none" className={`relative group/btn w-8 h-8 p-0 transition-colors rounded-md ${isTreeView ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary'}`}>
+        <Network size={16} strokeWidth={1.5} />
+        <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Toggle Tree View (Alt+Shift+T)</span>
+      </Button>
+      
+      <Button onClick={toggleFullscreen} variant="ghost" size="none" className="relative group/btn w-8 h-8 p-0 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary rounded-md transition-colors">
+        {isFullscreen ? <Minimize size={16} strokeWidth={1.5} /> : <Maximize size={16} strokeWidth={1.5} />}
+        <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">
+          {isFullscreen ? "Restore Editor (Alt+Shift+Enter)" : "Fullscreen Mode (Alt+Shift+Enter)"}
+        </span>
+      </Button>
+
+      <div className="relative" ref={themeMenuRef}>
+        <Button onClick={() => setShowThemeMenu(!showThemeMenu)} variant="ghost" size="none" className={`relative group/btn w-8 h-8 p-0 transition-colors rounded-md ${showThemeMenu ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary'}`}>
+          <Palette size={16} strokeWidth={1.5} />
+          <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Theme Settings</span>
+        </Button>
+
+        {showThemeMenu && (
+          <div className="absolute top-full mt-2 right-0 w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 p-4 space-y-4 text-left">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+              <span className="font-semibold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                <Palette size={16} className="text-primary" /> Appearance
+              </span>
+              <span className="text-[10px] text-slate-400 capitalize">{preset || 'custom'}</span>
+            </div>
+
+            {/* Presets */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Presets</label>
+              <div className="grid grid-cols-4 gap-1">
+                {[
+                  { id: 'classic', name: 'Classic' },
+                  { id: 'modern', name: 'Modern' },
+                  { id: 'professional', name: 'Pro' },
+                  { id: 'vibrant', name: 'Vibe' },
+                  { id: 'calm', name: 'Calm' },
+                  { id: 'cyber', name: 'Cyber' },
+                  { id: 'nature', name: 'Nat' },
+                  { id: 'candy', name: 'Candy' },
+                ].map((style) => (
+                  <button
+                    key={style.id}
+                    onClick={() => applyPreset(style.id as any)}
+                    className={`py-1 px-1.5 rounded text-center text-xs border font-medium transition-all ${
+                      preset === style.id
+                        ? 'border-primary bg-primary/10 text-primary font-bold shadow-sm'
+                        : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/50 text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    {style.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Mode & Glass */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Theme Mode</label>
+                <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg">
+                  {[
+                    { id: 'light', icon: Sun },
+                    { id: 'dark', icon: Moon },
+                    { id: 'system', icon: Monitor }
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setMode(item.id as any)}
+                        className={`flex-1 flex justify-center py-1 rounded transition-all ${
+                          mode === item.id 
+                            ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-sm font-semibold' 
+                            : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                        }`}
+                        title={item.id}
+                      >
+                        <Icon size={14} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Effects</label>
+                <button
+                  onClick={() => setGlass(!glass)}
+                  className={`w-full flex items-center justify-between px-2.5 py-1 rounded-lg border transition-all h-[26px] ${
+                    glass ? 'border-primary/50 bg-primary/5' : 'border-slate-200 dark:border-slate-800'
+                  }`}
+                >
+                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Glass</span>
+                  <div className={`w-6 h-3.5 rounded-full relative transition-colors ${glass ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'}`}>
+                    <div className={`absolute top-0.5 w-2.5 h-2.5 rounded-full bg-white shadow-sm transition-transform ${glass ? 'left-3' : 'left-0.5'}`} />
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Colors */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Primary Color</label>
+              <div className="grid grid-cols-6 gap-1.5">
+                {[
+                  { id: 'indigo', class: 'bg-indigo-600' },
+                  { id: 'blue', class: 'bg-blue-600' },
+                  { id: 'sky', class: 'bg-sky-600' },
+                  { id: 'cyan', class: 'bg-cyan-600' },
+                  { id: 'teal', class: 'bg-teal-600' },
+                  { id: 'emerald', class: 'bg-emerald-600' },
+                  { id: 'lime', class: 'bg-lime-600' },
+                  { id: 'orange', class: 'bg-orange-600' },
+                  { id: 'rose', class: 'bg-rose-600' },
+                  { id: 'pink', class: 'bg-pink-600' },
+                  { id: 'fuchsia', class: 'bg-fuchsia-600' },
+                  { id: 'violet', class: 'bg-violet-600' }
+                ].map((color) => (
+                  <button
+                    key={color.id}
+                    onClick={() => setPrimaryColor(color.id as any)}
+                    className={`relative w-8 h-8 rounded-lg ${color.class} flex items-center justify-center transition-all hover:scale-105 border ${
+                      primaryColor === color.id 
+                        ? 'border-white dark:border-slate-900 ring-2 ring-primary ring-offset-1 dark:ring-offset-slate-900 scale-100' 
+                        : 'border-transparent'
+                    }`}
+                    title={color.id}
+                  >
+                    {primaryColor === color.id && <Check size={12} className="text-white drop-shadow" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Radius */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Corner Radius</label>
+              <div className="flex gap-1">
+                {[
+                  { id: 'none', name: '0' },
+                  { id: 'sm', name: '2' },
+                  { id: 'md', name: '6' },
+                  { id: 'lg', name: '8' },
+                  { id: 'xl', name: '12' }
+                ].map((r) => (
+                  <button
+                    key={r.id}
+                    onClick={() => setRadius(r.id as any)}
+                    className={`flex-1 py-1 rounded text-center text-xs border font-medium transition-all ${
+                      radius === r.id
+                        ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900'
+                        : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    {r.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div 
       ref={containerRef}
       className={`flex flex-col relative overflow-hidden h-full w-full bg-white dark:bg-slate-900`}
     >
-      {/* Floating Toolbar - Sleek Minimal Glassmorphism */}
-      <div className="absolute top-4 right-6 z-20 flex gap-1 p-1 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-lg shadow-2xl transition-all duration-300 opacity-40 group-hover:opacity-100 hover:opacity-100 focus-within:opacity-100">
-        
-        <Button onClick={handleFormat} variant="ghost" className="relative group/btn w-11 h-11 p-0 text-primary/70 dark:text-primary/80 hover:bg-primary/10 hover:text-primary dark:hover:text-primary rounded-md transition-colors">
-          <Wand2 size={28} strokeWidth={1.5} />
-          <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Format JSON (Alt+Shift+F)</span>
-        </Button>
-        
-        <Button onClick={handleMinify} variant="ghost" className="relative group/btn w-11 h-11 p-0 text-primary/70 dark:text-primary/80 hover:bg-primary/10 hover:text-primary dark:hover:text-primary rounded-md transition-colors">
-          <Minimize2 size={28} strokeWidth={1.5} />
-          <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Minify JSON (Alt+Shift+M)</span>
-        </Button>
-        
-        <Button onClick={handleValidate} variant="ghost" className="relative group/btn w-11 h-11 p-0 text-primary/70 dark:text-primary/80 hover:bg-primary/10 hover:text-primary dark:hover:text-primary rounded-md transition-colors">
-          <CheckCircle size={28} strokeWidth={1.5} />
-          <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Validate JSON (Alt+Shift+V)</span>
-        </Button>
-        
-        <Button onClick={handleRepair} variant="ghost" className="relative group/btn w-11 h-11 p-0 text-primary/70 dark:text-primary/80 hover:bg-primary/10 hover:text-primary dark:hover:text-primary rounded-md transition-colors">
-          <Wrench size={28} strokeWidth={1.5} />
-          <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Auto Repair JSON (Alt+Shift+R)</span>
-        </Button>
-        
-        <div className="w-px h-5 bg-slate-200 dark:bg-white/5 my-auto mx-1"></div>
-        
-        <Button onClick={handleCopy} variant="ghost" className="relative group/btn w-11 h-11 p-0 text-primary/70 dark:text-primary/80 hover:bg-primary/10 hover:text-primary dark:hover:text-primary rounded-md transition-colors">
-          <Copy size={28} strokeWidth={1.5} />
-          <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Copy JSON (Alt+Shift+C)</span>
-        </Button>
-        
-        <Button onClick={handleDownload} variant="ghost" className="relative group/btn w-11 h-11 p-0 text-primary/70 dark:text-primary/80 hover:bg-primary/10 hover:text-primary dark:hover:text-primary rounded-md transition-colors">
-          <Download size={28} strokeWidth={1.5} />
-          <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Download JSON (Alt+Shift+D)</span>
-        </Button>
-        
-        <div className="w-px h-5 bg-slate-200 dark:bg-white/5 my-auto mx-1"></div>
-        
-        <Button onClick={handleClear} variant="ghost" className="relative group/btn w-11 h-11 p-0 text-red-400 dark:text-red-500 hover:bg-red-500/10 hover:text-red-500 dark:hover:text-red-400 rounded-md transition-colors">
-          <Trash2 size={28} strokeWidth={1.5} />
-          <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Clear Editor (Alt+Shift+X)</span>
-        </Button>
-        
-        <Button onClick={toggleTreeView} variant="ghost" className={`relative group/btn w-11 h-11 p-0 transition-colors rounded-md ${isTreeView ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary' : 'text-primary/70 dark:text-primary/80 hover:bg-primary/10 hover:text-primary dark:hover:text-primary'}`}>
-          <Network size={28} strokeWidth={1.5} />
-          <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">Toggle Tree View (Alt+Shift+T)</span>
-        </Button>
-        
-        <Button onClick={toggleFullscreen} variant="ghost" className="relative group/btn w-11 h-11 p-0 text-primary/70 dark:text-primary/80 hover:bg-primary/10 hover:text-primary dark:hover:text-primary rounded-md transition-colors">
-          {isFullscreen ? <Minimize size={28} strokeWidth={1.5} /> : <Maximize size={28} strokeWidth={1.5} />}
-          <span className="absolute top-full mt-2 right-0 px-2.5 py-1 bg-slate-800 dark:bg-black/90 text-slate-200 text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-lg border border-slate-700 dark:border-white/10">
-            {isFullscreen ? "Restore Editor (Alt+Shift+Enter)" : "Fullscreen Mode (Alt+Shift+Enter)"}
-          </span>
-        </Button>
-      </div>
-
       <div className="flex-1 min-h-0 bg-transparent flex flex-col relative group">
         <JSONTabs
           tabs={tabs}
@@ -341,6 +523,7 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
           onTabPinToggle={handlePinToggle}
           onTabRename={handleRenameTab}
           onNewTab={handleNewTab}
+          rightElement={toolbar}
         />
         
         <div className="flex-1 min-h-0 relative">

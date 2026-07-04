@@ -1,4 +1,5 @@
 import MonacoEditor, { OnMount } from '@monaco-editor/react';
+import { useEffect, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 
 interface EditorProps {
@@ -21,29 +22,56 @@ export const Editor = ({
   className = '',
   language = 'json',
   highlightError,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  placeholder,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  highlightLines,
-  zenMode = false,
   path
 }: EditorProps) => {
-  const { mode } = useTheme();
+  const { mode, basePalette } = useTheme();
+  const monacoRef = useRef<any>(null);
 
   const handleEditorChange = (value: string | undefined) => {
     onChange(value || '');
   };
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
-    // Add custom keybinding or actions if needed
-    // Example: Trigger format on load? No, let's keep it simple.
-
+    monacoRef.current = monaco;
+    
     if (highlightError) {
-      // Logic to scroll to error could go here, but Monaco handles errors via markers usually.
-      // We can manually reveal the line.
       editor.revealLineInCenter(highlightError);
     }
   };
+
+  // Dynamically update Monaco's dark background based on current active basePalette
+  useEffect(() => {
+    if (monacoRef.current) {
+      const bgColors = {
+        oled: '#000000',
+        charcoal: '#141414',
+        graphite: '#18181b',
+        slate: '#181a1f',
+        'light-slate': '#f8fafc',
+        'light-stone': '#fafaf9',
+        'light-warm': '#fafafb',
+      };
+      
+      const currentBg = bgColors[basePalette as keyof typeof bgColors] || '#141414';
+
+      monacoRef.current.editor.defineTheme('premium-dark', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [],
+        colors: {
+          'editor.background': currentBg,
+          'editor.foreground': '#cbd5e1',
+          'editorCursor.foreground': 'hsl(var(--primary))',
+          'editor.lineHighlightBackground': mode === 'dark' ? '#ffffff06' : '#00000006',
+          'editorLineNumber.foreground': '#475569',
+          'editor.selectionBackground': 'hsl(var(--primary)/0.25)',
+          'editor.inactiveSelectionBackground': 'hsl(var(--primary)/0.1)',
+        }
+      });
+      
+      monacoRef.current.editor.setTheme(mode === 'dark' ? 'premium-dark' : 'light');
+    }
+  }, [basePalette, mode]);
 
   return (
     <div className={`h-full w-full overflow-hidden rounded-md ${className}`}>
@@ -54,7 +82,7 @@ export const Editor = ({
         language={language}
         value={value}
         onChange={handleEditorChange}
-        theme={mode === 'dark' ? 'vs-dark' : 'light'}
+        theme={mode === 'dark' ? 'premium-dark' : 'light'}
         onMount={handleEditorDidMount}
         options={{
           readOnly,
@@ -67,6 +95,9 @@ export const Editor = ({
           lineNumbers: 'on',
           renderLineHighlight: 'all',
           wordWrap: 'on',
+          find: {
+            addExtraSpaceOnTop: false,
+          },
         }}
       />
     </div>
