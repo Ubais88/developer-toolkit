@@ -11,13 +11,47 @@ interface JSONCompareProps {
 }
 
 export const JSONCompare = ({ onCopy }: JSONCompareProps) => {
-  const { mode } = useTheme();
+  const { mode, basePalette } = useTheme();
   const monaco = useMonaco();
   const [original, setOriginal] = useSessionState('json-compare-original', '');
   const [modified, setModified] = useSessionState('json-compare-modified', '');
 
   const diffEditorRef = useRef<MonacoDiffEditor | null>(null);
   const widgetsRef = useRef<any[]>([]);
+
+  // Dynamically update DiffEditor background matching current active basePalette
+  useEffect(() => {
+    if (monaco) {
+      const bgColors = {
+        oled: '#000000',
+        charcoal: '#141414',
+        graphite: '#18181b',
+        slate: '#181a1f',
+        'light-slate': '#f8fafc',
+        'light-stone': '#fafaf9',
+        'light-warm': '#fafafb',
+      };
+      
+      const currentBg = bgColors[basePalette as keyof typeof bgColors] || '#141414';
+
+      monaco.editor.defineTheme('premium-dark', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [],
+        colors: {
+          'editor.background': currentBg,
+          'editor.foreground': '#cbd5e1',
+          'editorCursor.foreground': 'hsl(var(--primary))',
+          'editor.lineHighlightBackground': mode === 'dark' ? '#ffffff06' : '#00000006',
+          'editorLineNumber.foreground': '#475569',
+          'editor.selectionBackground': 'hsl(var(--primary)/0.25)',
+          'editor.inactiveSelectionBackground': 'hsl(var(--primary)/0.1)',
+        }
+      });
+      
+      monaco.editor.setTheme(mode === 'dark' ? 'premium-dark' : 'light');
+    }
+  }, [monaco, basePalette, mode]);
 
   const getEditorValues = () => {
     if (diffEditorRef.current) {
@@ -132,7 +166,7 @@ export const JSONCompare = ({ onCopy }: JSONCompareProps) => {
     <div className="flex flex-col h-full bg-transparent relative group">
       {/* Tools Layer */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 p-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-full shadow-lg transition-all opacity-100 ring-1 ring-black/5">
-        <Button onClick={handleCopyLeftToRight} variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0" title="Copy Left to Right">
+        <Button onClick={handleCopyLeftToRight} variant="ghost" size="none" className="rounded-full w-8 h-8 p-0" title="Copy Left to Right">
           <ArrowRight className="w-4 h-4 text-slate-500 hover:text-primary transition-colors" />
         </Button>
         <div className="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
@@ -141,7 +175,7 @@ export const JSONCompare = ({ onCopy }: JSONCompareProps) => {
           <span className="text-xs font-semibold">Format Both</span>
         </Button>
         <div className="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
-        <Button onClick={handleCopyRightToLeft} variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0" title="Copy Right to Left">
+        <Button onClick={handleCopyRightToLeft} variant="ghost" size="none" className="rounded-full w-8 h-8 p-0" title="Copy Right to Left">
           <ArrowLeft className="w-4 h-4 text-slate-500 hover:text-primary transition-colors" />
         </Button>
       </div>
@@ -155,9 +189,10 @@ export const JSONCompare = ({ onCopy }: JSONCompareProps) => {
           language="json"
           original={original}
           modified={modified}
-          theme={mode === 'dark' ? 'vs-dark' : 'light'}
+           theme={mode === 'dark' ? 'premium-dark' : 'light'}
           onMount={(editor) => {
             diffEditorRef.current = editor;
+
             const originalModel = editor.getOriginalEditor().getModel();
             const modifiedModel = editor.getModifiedEditor().getModel();
             if (originalModel) originalModel.onDidChangeContent(() => setOriginal(originalModel.getValue()));
@@ -172,6 +207,9 @@ export const JSONCompare = ({ onCopy }: JSONCompareProps) => {
             fontFamily: "'JetBrains Mono', 'Inter', monospace",
             padding: { top: 24, bottom: 24 },
             renderOverviewRuler: false,
+            find: {
+              addExtraSpaceOnTop: false,
+            },
           }}
         />
       </div>

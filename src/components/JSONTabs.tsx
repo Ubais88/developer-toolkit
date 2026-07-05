@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   DndContext, 
   closestCenter, 
@@ -38,6 +38,7 @@ interface JSONTabsProps {
   onTabPinToggle: (id: string) => void;
   onTabRename: (id: string, newName: string) => void;
   onNewTab: () => void;
+  rightElement?: React.ReactNode;
 }
 
 const SortableTab = ({ 
@@ -46,14 +47,20 @@ const SortableTab = ({
   onSelect, 
   onClose, 
   onContextMenu, 
-  onRename 
+  isEditing,
+  onStartEdit,
+  onCancelEdit,
+  onSubmitEdit
 }: { 
   tab: TabData; 
   isActive: boolean; 
   onSelect: () => void; 
   onClose: (e: React.MouseEvent) => void;
   onContextMenu: (e: React.MouseEvent) => void;
-  onRename: (newName: string) => void;
+  isEditing: boolean;
+  onStartEdit: () => void;
+  onCancelEdit: () => void;
+  onSubmitEdit: (newName: string) => void;
 }) => {
   const {
     attributes,
@@ -69,20 +76,39 @@ const SortableTab = ({
     transition,
   };
 
-  const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(tab.name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Keep internal state updated when tab name changes or editing starts
+  useEffect(() => {
+    if (isEditing) {
+      setEditName(tab.name);
+    }
+  }, [isEditing, tab.name]);
+
+  // Autofocus input and select filename (excluding extension) on edit start
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      const dotIndex = tab.name.lastIndexOf('.');
+      if (dotIndex > 0) {
+        inputRef.current.setSelectionRange(0, dotIndex);
+      } else {
+        inputRef.current.select();
+      }
+    }
+  }, [isEditing, tab.name]);
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsEditing(true);
+    onStartEdit();
   };
 
   const handleRenameSubmit = () => {
-    setIsEditing(false);
     if (editName.trim() && editName !== tab.name) {
-      onRename(editName.trim());
+      onSubmitEdit(editName.trim());
     } else {
-      setEditName(tab.name); // revert
+      onCancelEdit();
     }
   };
 
@@ -95,10 +121,10 @@ const SortableTab = ({
       onMouseDown={() => onSelect()}
       onContextMenu={onContextMenu}
       onDoubleClick={handleDoubleClick}
-      className={`group relative flex items-center min-w-[140px] max-w-[220px] h-11 px-3 border-r border-slate-200 dark:border-white/5 cursor-pointer select-none transition-colors duration-150
+      className={`group relative flex items-center min-w-[140px] max-w-[220px] h-11 px-3 border-r border-border cursor-pointer select-none transition-colors duration-150
         ${isActive 
-          ? 'bg-white dark:bg-slate-900 text-primary dark:text-slate-200 border-t-[1.5px] border-t-primary dark:border-t-violet-500 shadow-sm dark:shadow-[0_-1px_10px_rgba(139,92,246,0.15)] z-10' 
-          : 'bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-slate-700 dark:hover:text-slate-300 border-t-[1.5px] border-t-transparent'}
+          ? 'bg-card text-primary dark:text-slate-200 border-t-[1.5px] border-t-primary dark:border-t-primary shadow-sm dark:shadow-[0_-1px_10px_hsl(var(--primary)/0.15)] z-10' 
+          : 'bg-background text-muted-foreground hover:bg-muted/50 hover:text-foreground border-t-[1.5px] border-t-transparent'}
         ${isDragging ? 'opacity-50 z-50' : ''}
       `}
     >
@@ -106,15 +132,17 @@ const SortableTab = ({
       
       {isEditing ? (
         <input
+          ref={inputRef}
           type="text"
           value={editName}
-          autoFocus
+          onChange={(e) => setEditName(e.target.value)}
+          onMouseDown={(e) => e.stopPropagation()} // Stop drag trigger when selecting text/clicking in input
+          onPointerDown={(e) => e.stopPropagation()} // Stop pointer drag trigger
           onBlur={handleRenameSubmit}
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleRenameSubmit();
             if (e.key === 'Escape') {
-              setEditName(tab.name);
-              setIsEditing(false);
+              onCancelEdit();
             }
           }}
           className="flex-1 min-w-0 bg-transparent outline-none text-sm font-medium"
@@ -156,7 +184,8 @@ export const JSONTabs = ({
   onTabDuplicate,
   onTabPinToggle,
   onTabRename,
-  onNewTab
+  onNewTab,
+  rightElement
 }: JSONTabsProps) => {
   const sensors = useSensors(
     usePointerSensorWithDelay(),
@@ -166,6 +195,20 @@ export const JSONTabs = ({
   );
 
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, tabId: string } | null>(null);
+  const [editingTabId, setEditingTabId] = useState<string | null>(null);
+
+  // Global F2 keyboard listener to trigger renaming of active tab
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F2') {
+        e.preventDefault();
+        e.stopPropagation();
+        setEditingTabId(activeTabId);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown, true); // capture phase to intercept before Monaco
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [activeTabId]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -187,6 +230,7 @@ export const JSONTabs = ({
     if (!tab) return [];
 
     return [
+      { label: 'Rename', onClick: () => setEditingTabId(tab.id) },
       { label: 'Close', onClick: () => onTabClose(tab.id) },
       { label: 'Close Others', onClick: () => onTabCloseOthers(tab.id), disabled: tabs.length <= 1 },
       { divider: true, onClick: () => {} },
@@ -195,44 +239,58 @@ export const JSONTabs = ({
     ];
   };
 
-  // Sort tabs so pinned tabs are first? Native VS code usually just groups them. We'll rely on the user to sort them for now.
-
   return (
     <>
-      <div className="flex w-full items-center bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-white/5 overflow-x-auto scrollbar-none h-11 select-none">
-        <DndContext 
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext 
-            items={tabs.map(t => t.id)}
-            strategy={horizontalListSortingStrategy}
+      <div className="flex w-full items-center justify-between bg-background border-b border-border h-11 select-none">
+        <div className="flex-1 min-w-0 overflow-x-auto scrollbar-none h-full flex items-center">
+          <DndContext 
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            {tabs.map((tab) => (
-              <SortableTab
-                key={tab.id}
-                tab={tab}
-                isActive={activeTabId === tab.id}
-                onSelect={() => onTabSelect(tab.id)}
-                onClose={(e) => {
-                  e.stopPropagation();
-                  onTabClose(tab.id);
-                }}
-                onContextMenu={(e) => handleContextMenu(e, tab.id)}
-                onRename={(newName) => onTabRename(tab.id, newName)}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
-        
-        <button
-          onClick={onNewTab}
-          className="w-11 h-11 flex flex-shrink-0 items-center justify-center hover:bg-slate-200 dark:hover:bg-white/5 text-slate-500 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
-          title="New Tab (Ctrl+T)"
-        >
-          <Plus className="w-5 h-5" />
-        </button>
+            <SortableContext 
+              items={tabs.map(t => t.id)}
+              strategy={horizontalListSortingStrategy}
+            >
+              {tabs.map((tab) => (
+                <SortableTab
+                  key={tab.id}
+                  tab={tab}
+                  isActive={activeTabId === tab.id}
+                  onSelect={() => onTabSelect(tab.id)}
+                  onClose={(e) => {
+                    e.stopPropagation();
+                    onTabClose(tab.id);
+                  }}
+                  onContextMenu={(e) => handleContextMenu(e, tab.id)}
+                  isEditing={editingTabId === tab.id}
+                  onStartEdit={() => setEditingTabId(tab.id)}
+                  onCancelEdit={() => setEditingTabId(null)}
+                  onSubmitEdit={(newName) => {
+                    setEditingTabId(null);
+                    if (newName.trim() && newName !== tab.name) {
+                      onTabRename(tab.id, newName.trim());
+                    }
+                  }}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+          
+          <button
+            onClick={onNewTab}
+            className="w-11 h-11 flex flex-shrink-0 items-center justify-center hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+            title="New Tab (Ctrl+T)"
+          >
+            <Plus className="w-5 h-5" />
+          </button>
+        </div>
+
+        {rightElement && (
+          <div className="flex-shrink-0 flex items-center h-full px-2 border-l border-border bg-background">
+            {rightElement}
+          </div>
+        )}
       </div>
 
       {contextMenu && (
