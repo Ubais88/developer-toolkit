@@ -86,13 +86,13 @@
     background-color: rgba(255, 255, 255, 0.7);
   }
   .dark .glass {
-    background-color: rgba(15, 23, 42, 0.7);
+    background-color: hsla(var(--card) / 0.7);
   }
 
   /* Disable glass when data-glass is false */
-  /* We use higher specificity or !important if needed, but simple overrides should work if placed after */
   [data-glass="false"] .glass {
-    @apply backdrop-blur-none bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800;
+    @apply backdrop-blur-none bg-card border-border;
+    background-color: hsl(var(--card));
   }
 
   .glass-panel {
@@ -100,11 +100,12 @@
      background-color: rgba(255, 255, 255, 0.5);
   }
   .dark .glass-panel {
-     background-color: rgba(15, 23, 42, 0.5);
+     background-color: hsla(var(--card) / 0.5);
   }
   
   [data-glass="false"] .glass-panel {
-     @apply backdrop-blur-none bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800;
+     @apply backdrop-blur-none bg-card border-border;
+     background-color: hsl(var(--card));
   }
 }
 

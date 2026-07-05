@@ -29,85 +29,114 @@ export const SQLCompare = ({ onCopy }: SQLCompareProps) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900">
-      <div className="flex-shrink-0 border-b border-gray-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-800 shadow-sm z-10">
-        <div className="flex flex-wrap gap-3 items-center">
-          <Button onClick={handleCompare} variant="primary" size="sm">
-            <GitCompare className="w-4 h-4" />
-            Compare & Format
-          </Button>
-
-          <div className="flex items-center gap-4 ml-4">
-            <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer hover:text-slate-900 dark:hover:text-slate-200">
-              <input
-                type="checkbox"
-                checked={ignoreWhitespace}
-                onChange={(e) => setIgnoreWhitespace(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-indigo-600 focus:ring-indigo-500"
-              />
-              <span>Ignore whitespace</span>
-            </label>
-
-            <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer hover:text-slate-900 dark:hover:text-slate-200">
-              <input
-                type="checkbox"
-                checked={ignoreCase}
-                onChange={(e) => setIgnoreCase(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-indigo-600 focus:ring-indigo-500"
-              />
-              <span>Ignore case</span>
-            </label>
+    <div className="flex flex-col h-full bg-background overflow-hidden">
+      {/* Action Toolbar */}
+      <div className="flex-shrink-0 border-b border-border p-4 bg-card/40 backdrop-blur-sm z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
+            <GitCompare className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-foreground">SQL Difference Compare</h2>
+            <p className="text-[10px] text-muted-foreground">Compare structures and highlight casing/formatting variations</p>
           </div>
         </div>
 
-        {result && (
-          <div className={`mt-3 p-3 rounded-lg text-sm flex items-center gap-2 border ${
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Ignorance Chips */}
+          <button
+            onClick={() => setIgnoreWhitespace(!ignoreWhitespace)}
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all border ${
+              ignoreWhitespace
+                ? 'border-primary bg-primary/10 text-primary font-bold shadow-sm'
+                : 'border-border bg-background hover:bg-muted/50 text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Ignore Whitespace
+          </button>
+
+          <button
+            onClick={() => setIgnoreCase(!ignoreCase)}
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all border ${
+              ignoreCase
+                ? 'border-primary bg-primary/10 text-primary font-bold shadow-sm'
+                : 'border-border bg-background hover:bg-muted/50 text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Ignore Case
+          </button>
+
+          <span className="h-6 w-[1px] bg-border hidden sm:inline" />
+
+          <Button onClick={handleCompare} variant="primary" size="none" className="px-3 h-8 text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-sm">
+            <GitCompare className="w-3.5 h-3.5" />
+            Compare Queries
+          </Button>
+        </div>
+      </div>
+
+      {result && (
+        <div className="px-4 pt-4">
+          <div className={`p-3 rounded-lg text-xs flex items-center gap-2 border ${
             result.same
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-400'
-              : 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400'
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+              : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'
           }`}>
             {result.same ? (
               <>
-                <CheckCircle className="w-4 h-4" />
-                <span>SQL queries are identical</span>
+                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                <span className="font-semibold">SQL queries are identical</span>
               </>
             ) : (
               <>
-                <XCircle className="w-4 h-4" />
-                <span>SQL queries differ</span>
+                <XCircle className="w-4 h-4 text-rose-500 animate-pulse" />
+                <span className="font-semibold">SQL queries differ</span>
               </>
             )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      <div className="flex-1 min-h-0 grid grid-cols-2 gap-4 p-4">
-        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden flex flex-col">
-          <div className="bg-slate-50 dark:bg-slate-900 px-4 py-2 border-b border-gray-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-            <FileCode className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-            SQL Query 1
+      {/* Editor Grid */}
+      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+        {/* Editor 1 */}
+        <div 
+          className="bg-card border border-border overflow-hidden flex flex-col shadow-sm"
+          style={{ borderRadius: 'var(--radius)' }}
+        >
+          <div className="bg-muted/30 px-4 py-2.5 border-b border-border flex items-center gap-2">
+            <FileCode className="w-4 h-4 text-primary" />
+            <span className="text-xs font-bold text-foreground">SQL Query 1</span>
           </div>
-          <Editor
-            value={sql1}
-            onChange={setSql1}
-            placeholder="Paste first SQL query..."
-            language="sql"
-            className="border-0 rounded-none"
-          />
+          <div className="flex-1 min-h-0 relative">
+            <Editor
+              value={sql1}
+              onChange={setSql1}
+              placeholder="Paste first SQL query..."
+              language="sql"
+              className="border-0 rounded-none h-full"
+            />
+          </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden flex flex-col">
-          <div className="bg-slate-50 dark:bg-slate-900 px-4 py-2 border-b border-gray-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-            <FileCode className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-            SQL Query 2
+        {/* Editor 2 */}
+        <div 
+          className="bg-card border border-border overflow-hidden flex flex-col shadow-sm"
+          style={{ borderRadius: 'var(--radius)' }}
+        >
+          <div className="bg-muted/30 px-4 py-2.5 border-b border-border flex items-center gap-2">
+            <FileCode className="w-4 h-4 text-primary" />
+            <span className="text-xs font-bold text-foreground">SQL Query 2</span>
           </div>
-          <Editor
-            value={sql2}
-            onChange={setSql2}
-            placeholder="Paste second SQL query..."
-            language="sql"
-            className="border-0 rounded-none"
-          />
+          <div className="flex-1 min-h-0 relative">
+            <Editor
+              value={sql2}
+              onChange={setSql2}
+              placeholder="Paste second SQL query..."
+              language="sql"
+              className="border-0 rounded-none h-full"
+            />
+          </div>
         </div>
       </div>
     </div>

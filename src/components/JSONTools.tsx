@@ -442,7 +442,7 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
                     className={`py-1 px-1.5 rounded text-center text-xs border font-medium transition-all ${
                       preset === style.id
                         ? 'border-primary bg-primary/10 text-primary font-bold shadow-sm'
-                        : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/50 text-slate-600 dark:text-slate-400'
+                        : 'border-border hover:border-primary/50 bg-card text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     {style.name}
@@ -455,7 +455,7 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Theme Mode</label>
-                <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg">
+                <div className="flex bg-muted p-0.5 rounded-lg">
                   {[
                     { id: 'light', icon: Sun },
                     { id: 'dark', icon: Moon },
@@ -468,8 +468,8 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
                         onClick={() => setMode(item.id as any)}
                         className={`flex-1 flex justify-center py-1 rounded transition-all ${
                           mode === item.id 
-                            ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-sm font-semibold' 
-                            : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                            ? 'bg-card text-primary dark:text-foreground shadow-sm font-semibold' 
+                            : 'text-muted-foreground hover:text-foreground'
                         }`}
                         title={item.id}
                       >
@@ -485,12 +485,12 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
                 <button
                   onClick={() => setGlass(!glass)}
                   className={`w-full flex items-center justify-between px-2.5 py-1 rounded-lg border transition-all h-[26px] ${
-                    glass ? 'border-primary/50 bg-primary/5' : 'border-slate-200 dark:border-slate-800'
+                    glass ? 'border-primary/50 bg-primary/5' : 'border-border'
                   }`}
                 >
-                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Glass</span>
-                  <div className={`w-6 h-3.5 rounded-full relative transition-colors ${glass ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'}`}>
-                    <div className={`absolute top-0.5 w-2.5 h-2.5 rounded-full bg-white shadow-sm transition-transform ${glass ? 'left-3' : 'left-0.5'}`} />
+                  <span className="text-xs font-medium text-foreground">Glass</span>
+                  <div className={`w-6 h-3.5 rounded-full relative transition-colors ${glass ? 'bg-primary' : 'bg-muted border border-border'}`}>
+                    <div className={`absolute top-0.5 w-2.5 h-2.5 rounded-full bg-white shadow-sm transition-all duration-200 ${glass ? 'left-[12px]' : 'left-0.5'}`} />
                   </div>
                 </button>
               </div>
@@ -546,8 +546,8 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
                     onClick={() => setRadius(r.id as any)}
                     className={`flex-1 py-1 rounded text-center text-xs border font-medium transition-all ${
                       radius === r.id
-                        ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900'
-                        : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
+                        ? 'bg-foreground text-background border-foreground'
+                        : 'bg-card text-foreground border-border hover:bg-muted/50'
                     }`}
                   >
                     {r.name}
@@ -571,7 +571,7 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
   return (
     <div 
       ref={containerRef}
-      className={`flex flex-col relative overflow-hidden h-full w-full bg-white dark:bg-slate-900`}
+      className={`flex flex-col relative overflow-hidden h-full w-full bg-background`}
     >
       <div className="flex-1 min-h-0 bg-transparent flex flex-col relative group">
         <JSONTabs
@@ -590,7 +590,7 @@ export const JSONTools = ({ onCopy }: JSONToolsProps) => {
         
         <div className="flex-1 min-h-0 relative">
           {isTreeView ? (
-            <div className="h-full overflow-auto p-4 bg-slate-50 dark:bg-slate-900/50">
+            <div className="h-full overflow-auto p-4 bg-background">
               {parsedJson ? (
                 <JsonView 
                   data={parsedJson} 

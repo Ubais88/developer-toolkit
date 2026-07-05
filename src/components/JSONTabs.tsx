@@ -121,10 +121,10 @@ const SortableTab = ({
       onMouseDown={() => onSelect()}
       onContextMenu={onContextMenu}
       onDoubleClick={handleDoubleClick}
-      className={`group relative flex items-center min-w-[140px] max-w-[220px] h-11 px-3 border-r border-slate-200 dark:border-white/5 cursor-pointer select-none transition-colors duration-150
+      className={`group relative flex items-center min-w-[140px] max-w-[220px] h-11 px-3 border-r border-border cursor-pointer select-none transition-colors duration-150
         ${isActive 
-          ? 'bg-white dark:bg-slate-900 text-primary dark:text-slate-200 border-t-[1.5px] border-t-primary dark:border-t-primary shadow-sm dark:shadow-[0_-1px_10px_hsl(var(--primary)/0.15)] z-10' 
-          : 'bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-slate-700 dark:hover:text-slate-300 border-t-[1.5px] border-t-transparent'}
+          ? 'bg-card text-primary dark:text-slate-200 border-t-[1.5px] border-t-primary dark:border-t-primary shadow-sm dark:shadow-[0_-1px_10px_hsl(var(--primary)/0.15)] z-10' 
+          : 'bg-background text-muted-foreground hover:bg-muted/50 hover:text-foreground border-t-[1.5px] border-t-transparent'}
         ${isDragging ? 'opacity-50 z-50' : ''}
       `}
     >
@@ -241,7 +241,7 @@ export const JSONTabs = ({
 
   return (
     <>
-      <div className="flex w-full items-center justify-between bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-white/5 h-11 select-none">
+      <div className="flex w-full items-center justify-between bg-background border-b border-border h-11 select-none">
         <div className="flex-1 min-w-0 overflow-x-auto scrollbar-none h-full flex items-center">
           <DndContext 
             sensors={sensors}
@@ -279,7 +279,7 @@ export const JSONTabs = ({
           
           <button
             onClick={onNewTab}
-            className="w-11 h-11 flex flex-shrink-0 items-center justify-center hover:bg-slate-200 dark:hover:bg-white/5 text-slate-500 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+            className="w-11 h-11 flex flex-shrink-0 items-center justify-center hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
             title="New Tab (Ctrl+T)"
           >
             <Plus className="w-5 h-5" />
@@ -287,7 +287,7 @@ export const JSONTabs = ({
         </div>
 
         {rightElement && (
-          <div className="flex-shrink-0 flex items-center h-full px-2 border-l border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950">
+          <div className="flex-shrink-0 flex items-center h-full px-2 border-l border-border bg-background">
             {rightElement}
           </div>
         )}

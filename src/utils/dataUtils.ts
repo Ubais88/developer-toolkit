@@ -191,3 +191,58 @@ export const binaryStringToBlob = (input: string): Blob => {
   // So we just return the Blob of type xlsx.
   return new Blob([u8], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 };
+
+export const htmlEncode = (str: string): string => {
+  return str.replace(/[\u00A0-\u9999<>&]/g, (i) => `&#${i.charCodeAt(0)};`);
+};
+
+export const htmlDecode = (str: string): string => {
+  try {
+    const doc = new DOMParser().parseFromString(str, 'text/html');
+    return doc.documentElement.textContent || str;
+  } catch {
+    return str;
+  }
+};
+
+export const convertCase = (str: string, type: 'camel' | 'snake' | 'pascal' | 'kebab' | 'upper' | 'lower'): string => {
+  const clean = str.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+  const words = clean.trim().split(/[\s_-]+/).filter(w => w.length > 0);
+  if (!words.length) return '';
+  switch (type) {
+    case 'camel':
+      return words[0].toLowerCase() + words.slice(1).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
+    case 'snake':
+      return words.map(w => w.toLowerCase()).join('_');
+    case 'pascal':
+      return words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
+    case 'kebab':
+      return words.map(w => w.toLowerCase()).join('-');
+    case 'upper':
+      return str.toUpperCase();
+    case 'lower':
+      return str.toLowerCase();
+  }
+};
+
+export const generateLoremIpsum = (count: number, type: 'paragraphs' | 'sentences' | 'words'): string => {
+  const loremWords = ['lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua', 'ut', 'enim', 'ad', 'minim', 'veniam', 'quis', 'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi', 'ut', 'aliquip', 'ex', 'ea', 'commodo', 'consequat'];
+  
+  const makeSentence = () => {
+    const len = Math.floor(Math.random() * 8) + 6;
+    const sWords = Array.from({ length: len }, () => loremWords[Math.floor(Math.random() * loremWords.length)]);
+    sWords[0] = sWords[0].charAt(0).toUpperCase() + sWords[0].slice(1);
+    return sWords.join(' ') + '.';
+  };
+
+  if (type === 'words') {
+    return Array.from({ length: count }, () => loremWords[Math.floor(Math.random() * loremWords.length)]).join(' ');
+  }
+  if (type === 'sentences') {
+    return Array.from({ length: count }, makeSentence).join(' ');
+  }
+  return Array.from({ length: count }, () => {
+    const sLen = Math.floor(Math.random() * 4) + 3;
+    return Array.from({ length: sLen }, makeSentence).join(' ');
+  }).join('\n\n');
+};

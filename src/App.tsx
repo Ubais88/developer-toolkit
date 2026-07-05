@@ -61,16 +61,16 @@ function AppContent() {
       />
 
       <main
-        className={`flex-1 min-w-0 flex flex-col h-screen transition-all duration-150 ease-out relative bg-slate-50 dark:bg-slate-950
+        className={`flex-1 min-w-0 flex flex-col h-screen transition-all duration-150 ease-out relative bg-background
           ${sidebarOpen ? 'pl-64' : 'pl-16'}
         `}
       >
         {/* Content Area - Full Bleed */}
-        <div className="flex-1 min-h-0 bg-white dark:bg-slate-900 overflow-hidden relative">
+        <div className="flex-1 min-h-0 bg-background overflow-hidden relative">
           <Routes>
             <Route path="/" element={<JSONTools onCopy={handleCopy} />} />
             <Route path="/compare" element={<JSONCompare onCopy={handleCopy} />} />
-            <Route path="/url-modifier" element={<URLModifier />} />
+            <Route path="/url-modifier" element={<URLModifier onCopy={handleCopy} />} />
             <Route path="/sql-compare" element={<SQLCompare onCopy={handleCopy} />} />
             <Route path="/sql-helper" element={<SQLHelper onCopy={handleCopy} />} />
             <Route path="/data" element={<DataUtilities onCopy={handleCopy} />} />
