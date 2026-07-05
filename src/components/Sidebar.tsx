@@ -1,74 +1,89 @@
-import { ChevronsRight } from 'lucide-react';
+import { ChevronsRight, FileJson, GitCompare, Database, FileCode, Split, Settings, Palette, Github, Bell, Link as LinkIcon, SearchCode } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { Logo } from './Logo';
+import { ThemeToggle } from './ThemeToggle';
+
+const ICONS: Record<string, any> = {
+  'json': FileJson,
+  'compare': GitCompare,
+  'url-modifier': LinkIcon,
+  'sql-compare': Database,
+  'sql-helper': FileCode,
+  'data': Settings,
+  'comma': Split,
+  'theme': Palette,
+  'regex': SearchCode,
+};
 
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
-  tabs: { id: string; label: string; icon: any }[];
+  tabs: { id: string; label: string; path: string }[];
 }
 
 export const Sidebar = ({ isOpen, onToggle, tabs }: SidebarProps) => {
   return (
     <aside
-      className={`fixed top-4 left-4 bottom-4 z-40 flex flex-col transition-all duration-300 ease-in-out font-sans 
-        ${isOpen ? 'w-72' : 'w-20'}
-        glass rounded-2xl border border-white/20 dark:border-white/5
+      className={`fixed top-0 left-0 bottom-0 z-40 flex flex-col transition-all duration-150 ease-out font-sans 
+        ${isOpen ? 'w-64' : 'w-16'}
+        bg-background border-r border-border
       `}
     >
       {/* Header */}
-      <div className="h-20 flex items-center px-6 mb-2">
-        <div className="flex items-center gap-4 overflow-hidden whitespace-nowrap w-full">
-          <div className={`flex-shrink-0 transition-transform duration-300 ${isOpen ? '' : 'mx-auto'}`}>
-            <Logo className="w-10 h-10 text-primary drop-shadow-sm" />
+      <div className={`flex items-center mb-2 transition-all ${isOpen ? 'h-20 px-6' : 'h-16 px-0 justify-center'}`}>
+        <div className="flex items-center gap-3 overflow-hidden whitespace-nowrap">
+          <div className="flex-shrink-0">
+            <Logo className="w-9 h-9 text-primary drop-shadow-sm" />
           </div>
 
-          <div className={`flex flex-col transition-all duration-300 ${isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10 w-0 absolute'}`}>
-            <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Ghost<span className="text-primary">ToolKit</span>
-            </span>
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-              Pro Suite
-            </span>
-          </div>
+          {isOpen && (
+            <div className="flex flex-col transition-all duration-150">
+              <span className="text-[16px] font-bold tracking-tight text-slate-900 dark:text-white">
+                Ubais<span className="text-primary">ToolKit</span>
+              </span>
+              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
+                Pro Suite
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 space-y-2 overflow-y-auto no-scrollbar">
+      <nav className="flex-1 px-3 space-y-1 overflow-y-auto no-scrollbar">
         {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const path = tab.id === 'json' ? '/' : `/${tab.id}`;
+          const Icon = ICONS[tab.id] || Settings;
+          const path = tab.path;
 
           return (
             <NavLink
               key={tab.id}
               to={path}
               className={({ isActive }) => `
-                relative flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 group
+                relative flex items-center transition-colors duration-150 group
                 ${isActive
-                  ? 'bg-primary text-white shadow-md shadow-primary/25'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-primary/10 text-primary dark:bg-white/10 dark:text-white'
+                  : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                 }
-                ${!isOpen && 'justify-center px-2'}
+                ${isOpen ? 'gap-3 px-3 py-2.5 rounded-lg w-full' : 'w-10 h-10 mx-auto justify-center rounded-lg'}
               `}
               title={!isOpen ? tab.label : undefined}
             >
               {({ isActive }) => (
                 <>
-                  <div className={`flex-shrink-0 transition-transform duration-200 ${!isOpen && 'group-hover:scale-110'}`}>
-                    <Icon className={`w-6 h-6 ${isActive ? 'text-white' : ''}`} strokeWidth={2} />
+                  <div className={`flex-shrink-0 transition-transform duration-150 ${!isOpen && 'group-hover:scale-110'}`}>
+                    <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-primary dark:text-white' : 'opacity-80'}`} strokeWidth={2} />
                   </div>
 
                   {isOpen && (
-                    <span className="font-medium text-[15px] truncate">
+                    <span className="font-medium text-sm truncate">
                       {tab.label}
                     </span>
                   )}
 
-                  {/* Active Indicator Pille for closed state */}
+                  {/* Active Indicator Pill for closed state */}
                   {!isOpen && isActive && (
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-l-full" />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary dark:bg-white rounded-r-full" />
                   )}
                 </>
               )}
@@ -78,22 +93,36 @@ export const Sidebar = ({ isOpen, onToggle, tabs }: SidebarProps) => {
       </nav>
 
       {/* Footer / Toggle */}
-      <div className="p-4 mt-auto">
+      <div className={`mt-auto border-t border-border flex flex-col transition-all ${isOpen ? 'p-2 gap-2' : 'p-2 items-center'}`}>
+        {isOpen && (
+          <div className="flex items-center justify-between px-0 py-1 mb-1">
+            <div className="flex items-center gap-2">
+              <a href="https://github.com/ubais88" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-md hover:bg-muted/50">
+                <Github className="w-4 h-4" />
+              </a>
+              <button className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-md hover:bg-muted/50">
+                <Bell className="w-4 h-4" />
+              </button>
+            </div>
+            <ThemeToggle />
+          </div>
+        )}
+        
         <button
           onClick={onToggle}
           className={`
-            w-full flex items-center justify-center p-3 rounded-xl transition-all duration-200
-            hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white
-            ${!isOpen && 'aspect-square'}
+            flex items-center justify-center rounded-lg transition-colors duration-150
+            hover:bg-muted/50 text-muted-foreground hover:text-foreground
+            ${isOpen ? 'w-full p-2' : 'w-10 h-10'}
           `}
         >
           {isOpen ? (
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <ChevronsRight className="w-5 h-5 rotate-180" />
-              <span>Collapse Sidebar</span>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider">
+              <ChevronsRight className="w-4 h-4 rotate-180" />
+              <span>Collapse</span>
             </div>
           ) : (
-            <ChevronsRight className="w-6 h-6" />
+            <ChevronsRight className="w-4 h-4" />
           )}
         </button>
       </div>

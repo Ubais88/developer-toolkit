@@ -1,4 +1,5 @@
-import MonacoEditor, { OnMount } from '@monaco-editor/react';
+import MonacoEditor, { OnMount, useMonaco } from '@monaco-editor/react';
+import { useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 
 interface EditorProps {
@@ -10,6 +11,9 @@ interface EditorProps {
   highlightError?: number;
   placeholder?: string;
   highlightLines?: Set<number>;
+  zenMode?: boolean;
+  path?: string; // Used to separate Monaco Editor models natively (undo/redo, state)
+  onCursorChange?: (line: number, column: number) => void;
 }
 
 export const Editor = ({
@@ -19,37 +23,73 @@ export const Editor = ({
   className = '',
   language = 'json',
   highlightError,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  placeholder,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  highlightLines
+  path,
+  onCursorChange
 }: EditorProps) => {
-  const { mode } = useTheme();
+  const { mode, basePalette } = useTheme();
+  const monaco = useMonaco();
 
   const handleEditorChange = (value: string | undefined) => {
     onChange(value || '');
   };
 
-  const handleEditorDidMount: OnMount = (editor, monaco) => {
-    // Add custom keybinding or actions if needed
-    // Example: Trigger format on load? No, let's keep it simple.
-
+  const handleEditorDidMount: OnMount = (editor) => {
+    // Listen for cursor position changes
+    editor.onDidChangeCursorPosition((e) => {
+      if (onCursorChange) {
+        onCursorChange(e.position.lineNumber, e.position.column);
+      }
+    });
+    
     if (highlightError) {
-      // Logic to scroll to error could go here, but Monaco handles errors via markers usually.
-      // We can manually reveal the line.
       editor.revealLineInCenter(highlightError);
     }
   };
 
+  // Dynamically define and update Monaco's theme based on mode/palette reactively
+  useEffect(() => {
+    if (monaco) {
+      const bgColors = {
+        oled: '#000000',
+        charcoal: '#141414',
+        graphite: '#18181b',
+        slate: '#181a1f',
+        'light-slate': '#f8fafc',
+        'light-stone': '#fafaf9',
+        'light-warm': '#fafafb',
+      };
+      
+      const currentBg = bgColors[basePalette as keyof typeof bgColors] || '#141414';
+
+      monaco.editor.defineTheme('premium-dark', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [],
+        colors: {
+          'editor.background': currentBg,
+          'editor.foreground': '#cbd5e1',
+          'editorCursor.foreground': 'hsl(var(--primary))',
+          'editor.lineHighlightBackground': mode === 'dark' ? '#ffffff06' : '#00000006',
+          'editorLineNumber.foreground': '#475569',
+          'editor.selectionBackground': 'hsl(var(--primary)/0.25)',
+          'editor.inactiveSelectionBackground': 'hsl(var(--primary)/0.1)',
+        }
+      });
+      
+      monaco.editor.setTheme(mode === 'dark' ? 'premium-dark' : 'light');
+    }
+  }, [monaco, basePalette, mode]);
+
   return (
     <div className={`h-full w-full overflow-hidden rounded-md ${className}`}>
       <MonacoEditor
+        path={path}
         height="100%"
         defaultLanguage={language}
         language={language}
         value={value}
         onChange={handleEditorChange}
-        theme={mode === 'dark' ? 'vs-dark' : 'light'}
+        theme={mode === 'dark' ? 'premium-dark' : 'light'}
         onMount={handleEditorDidMount}
         options={{
           readOnly,
@@ -62,6 +102,9 @@ export const Editor = ({
           lineNumbers: 'on',
           renderLineHighlight: 'all',
           wordWrap: 'on',
+          find: {
+            addExtraSpaceOnTop: false,
+          },
         }}
       />
     </div>

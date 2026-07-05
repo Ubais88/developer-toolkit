@@ -1,3 +1,5 @@
+import { jsonrepair } from 'jsonrepair';
+
 export const formatJSON = (input: string): string => {
   try {
     const parsed = JSON.parse(input);
@@ -66,5 +68,13 @@ export const compareJSON = (json1: string, json2: string): {
     return { diff };
   } catch (error) {
     throw new Error('Invalid JSON for comparison');
+  }
+};
+
+export const repairJSON = (input: string): string => {
+  try {
+    return jsonrepair(input);
+  } catch (_error) {
+    throw new Error('Could not repair JSON automatically');
   }
 };
