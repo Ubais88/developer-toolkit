@@ -2,7 +2,8 @@ import { useId } from 'react';
 
 export const Logo = ({ className = "w-8 h-8" }: { className?: string }) => {
   const gradientId = useId().replace(/:/g, "-");
-  const glowId = useId().replace(/:/g, "-");
+  const highlightId = useId().replace(/:/g, "-");
+  const shadowId = useId().replace(/:/g, "-");
   
   return (
     <svg
@@ -12,48 +13,47 @@ export const Logo = ({ className = "w-8 h-8" }: { className?: string }) => {
       className={className}
     >
       <defs>
-        {/* Main vibrant gradient */}
-        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="var(--primary)" />
-          <stop offset="50%" stopColor="#8B5CF6" /> {/* Violet */}
-          <stop offset="100%" stopColor="#06B6D4" /> {/* Cyan */}
+        <linearGradient id={gradientId} x1="16" y1="14" x2="86" y2="88" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="hsl(var(--primary))" />
+          <stop offset="100%" stopColor="#312E81" />
         </linearGradient>
-
-        {/* Glow filter for premium neon effect */}
-        <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="3" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        <linearGradient id={highlightId} x1="22" y1="18" x2="74" y2="76" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.26" />
+          <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+        </linearGradient>
+        <filter id={shadowId} x="-18%" y="-18%" width="136%" height="136%">
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#0F172A" floodOpacity="0.22" />
         </filter>
       </defs>
 
-      {/* Hexagonal Outer Frame */}
-      <polygon
-        points="50,10 88,32 88,78 50,90 12,78 12,32"
-        stroke={`url(#${gradientId})`}
-        strokeWidth="3.5"
-        strokeLinejoin="round"
-        fill="none"
-        opacity="0.25"
-      />
-
-      {/* Inner Stylized U / Code Bracket ribbon */}
-      <path
-        d="M32 30 V58 C32 68 38 74 50 74 C62 74 68 68 68 58 V30 
-           M32 30 H42 V58 C42 63 45 65 50 65 C55 65 58 63 58 58 V30 H68"
+      <rect
+        x="10"
+        y="10"
+        width="80"
+        height="80"
+        rx="22"
         fill={`url(#${gradientId})`}
-        fillRule="evenodd"
-        clipRule="evenodd"
-        filter={`url(#${glowId})`}
+        filter={`url(#${shadowId})`}
       />
+      <path d="M24 20H58C72 20 80 28 80 42V76" stroke={`url(#${highlightId})`} strokeWidth="2.5" strokeLinecap="round" />
 
-      {/* Futuristic central code slash/accent */}
       <path
-        d="M45 42 L55 58"
-        stroke="#06B6D4"
-        strokeWidth="4"
+        d="M35 29V58C35 70 41 77 50 77C59 77 65 70 65 58V29"
+        stroke="white"
+        strokeWidth="8"
         strokeLinecap="round"
-        filter={`url(#${glowId})`}
+        strokeLinejoin="round"
       />
+      <path
+        d="M31 39L23 47L31 55M69 39L77 47L69 55"
+        stroke="#DDE5F3"
+        strokeWidth="6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.88"
+      />
+      <path d="M55 43L46 63" stroke="#93C5FD" strokeWidth="5.5" strokeLinecap="round" />
+      <circle cx="72" cy="27" r="3.5" fill="#93C5FD" />
     </svg>
   );
 };
