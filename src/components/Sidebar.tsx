@@ -1,4 +1,4 @@
-import { ChevronsRight, FileJson, GitCompare, Database, FileCode, Split, Settings, Palette, Github, Bell, Link as LinkIcon } from 'lucide-react';
+import { ChevronsRight, FileJson, GitCompare, Database, FileCode, Split, Settings, Palette, Github, Bell, Link as LinkIcon, SearchCode } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
@@ -12,6 +12,7 @@ const ICONS: Record<string, any> = {
   'data': Settings,
   'comma': Split,
   'theme': Palette,
+  'regex': SearchCode,
 };
 
 interface SidebarProps {

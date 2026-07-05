@@ -11,6 +11,7 @@ import { ThemeEditor } from './components/ThemeEditor';
 import { Toast } from './components/Toast';
 import { useToast } from './hooks/useToast';
 import { URLModifier } from './components/URLModifier';
+import { RegexTester } from './components/RegexTester';
 import { ThemeProvider } from './context/ThemeContext';
 
 function AppContent() {
@@ -26,6 +27,7 @@ function AppContent() {
   const tabs = [
     { id: 'json', label: 'JSON Tools', path: '/' },
     { id: 'compare', label: 'JSON Compare', path: '/compare' },
+    { id: 'regex', label: 'Regex Tester', path: '/regex' },
     { id: 'url-modifier', label: 'URL Modifier', path: '/url-modifier' },
     { id: 'sql-compare', label: 'SQL Compare', path: '/sql-compare' },
     { id: 'sql-helper', label: 'SQL Helper', path: '/sql-helper' },
@@ -70,6 +72,7 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<JSONTools onCopy={handleCopy} />} />
             <Route path="/compare" element={<JSONCompare onCopy={handleCopy} />} />
+            <Route path="/regex" element={<RegexTester onCopy={handleCopy} />} />
             <Route path="/url-modifier" element={<URLModifier onCopy={handleCopy} />} />
             <Route path="/sql-compare" element={<SQLCompare onCopy={handleCopy} />} />
             <Route path="/sql-helper" element={<SQLHelper onCopy={handleCopy} />} />

@@ -1,5 +1,5 @@
-import MonacoEditor, { OnMount } from '@monaco-editor/react';
-import { useEffect, useRef } from 'react';
+import MonacoEditor, { OnMount, useMonaco } from '@monaco-editor/react';
+import { useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 
 interface EditorProps {
@@ -27,15 +27,13 @@ export const Editor = ({
   onCursorChange
 }: EditorProps) => {
   const { mode, basePalette } = useTheme();
-  const monacoRef = useRef<any>(null);
+  const monaco = useMonaco();
 
   const handleEditorChange = (value: string | undefined) => {
     onChange(value || '');
   };
 
-  const handleEditorDidMount: OnMount = (editor, monaco) => {
-    monacoRef.current = monaco;
-    
+  const handleEditorDidMount: OnMount = (editor) => {
     // Listen for cursor position changes
     editor.onDidChangeCursorPosition((e) => {
       if (onCursorChange) {
@@ -48,9 +46,9 @@ export const Editor = ({
     }
   };
 
-  // Dynamically update Monaco's dark background based on current active basePalette
+  // Dynamically define and update Monaco's theme based on mode/palette reactively
   useEffect(() => {
-    if (monacoRef.current) {
+    if (monaco) {
       const bgColors = {
         oled: '#000000',
         charcoal: '#141414',
@@ -63,7 +61,7 @@ export const Editor = ({
       
       const currentBg = bgColors[basePalette as keyof typeof bgColors] || '#141414';
 
-      monacoRef.current.editor.defineTheme('premium-dark', {
+      monaco.editor.defineTheme('premium-dark', {
         base: 'vs-dark',
         inherit: true,
         rules: [],
@@ -78,9 +76,9 @@ export const Editor = ({
         }
       });
       
-      monacoRef.current.editor.setTheme(mode === 'dark' ? 'premium-dark' : 'light');
+      monaco.editor.setTheme(mode === 'dark' ? 'premium-dark' : 'light');
     }
-  }, [basePalette, mode]);
+  }, [monaco, basePalette, mode]);
 
   return (
     <div className={`h-full w-full overflow-hidden rounded-md ${className}`}>
