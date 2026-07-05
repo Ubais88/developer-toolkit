@@ -1,42 +1,44 @@
 <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6366F1" />
-      <stop offset="50%" stop-color="#8B5CF6" />
-      <stop offset="100%" stop-color="#06B6D4" />
+    <linearGradient id="logo-gradient" x1="16" y1="14" x2="86" y2="88" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#312E81" />
     </linearGradient>
-    <filter id="logo-glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="3" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    <linearGradient id="logo-highlight" x1="22" y1="18" x2="74" y2="76" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.26" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+    <filter id="logo-shadow" x="-18%" y="-18%" width="136%" height="136%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#0F172A" flood-opacity="0.22" />
     </filter>
   </defs>
 
-  <!-- Hexagonal Outer Frame -->
-  <polygon
-    points="50,10 88,32 88,78 50,90 12,78 12,32"
-    stroke="url(#logo-gradient)"
-    stroke-width="3.5"
-    stroke-linejoin="round"
-    fill="none"
-    opacity="0.25"
-  />
-
-  <!-- Inner Stylized U / Code Bracket ribbon -->
-  <path
-    d="M32 30 V58 C32 68 38 74 50 74 C62 74 68 68 68 58 V30 
-       M32 30 H42 V58 C42 63 45 65 50 65 C55 65 58 63 58 58 V30 H68"
+  <rect
+    x="10"
+    y="10"
+    width="80"
+    height="80"
+    rx="22"
     fill="url(#logo-gradient)"
-    fill-rule="evenodd"
-    clip-rule="evenodd"
-    filter="url(#logo-glow)"
+    filter="url(#logo-shadow)"
   />
+  <path d="M24 20H58C72 20 80 28 80 42V76" stroke="url(#logo-highlight)" stroke-width="2.5" stroke-linecap="round" />
 
-  <!-- Futuristic central code slash/accent -->
   <path
-    d="M45 42 L55 58"
-    stroke="#06B6D4"
-    stroke-width="4"
+    d="M35 29V58C35 70 41 77 50 77C59 77 65 70 65 58V29"
+    stroke="white"
+    stroke-width="8"
     stroke-linecap="round"
-    filter="url(#logo-glow)"
+    stroke-linejoin="round"
   />
+  <path
+    d="M31 39L23 47L31 55M69 39L77 47L69 55"
+    stroke="#DDE5F3"
+    stroke-width="6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    opacity="0.88"
+  />
+  <path d="M55 43L46 63" stroke="#93C5FD" stroke-width="5.5" stroke-linecap="round" />
+  <circle cx="72" cy="27" r="3.5" fill="#93C5FD" />
 </svg>
