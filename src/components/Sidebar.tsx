@@ -92,9 +92,9 @@ export const Sidebar = ({ isOpen, onToggle, tabs }: SidebarProps) => {
       </nav>
 
       {/* Footer / Toggle */}
-      <div className={`mt-auto border-t border-border flex flex-col transition-all ${isOpen ? 'p-4 gap-2' : 'p-2 items-center'}`}>
+      <div className={`mt-auto border-t border-border flex flex-col transition-all ${isOpen ? 'p-2 gap-2' : 'p-2 items-center'}`}>
         {isOpen && (
-          <div className="flex items-center justify-between px-1 py-1 mb-1">
+          <div className="flex items-center justify-between px-0 py-1 mb-1">
             <div className="flex items-center gap-2">
               <a href="https://github.com/ubais88" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-md hover:bg-muted/50">
                 <Github className="w-4 h-4" />
