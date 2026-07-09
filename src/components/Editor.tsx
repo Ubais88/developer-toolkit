@@ -26,7 +26,7 @@ export const Editor = ({
   path,
   onCursorChange
 }: EditorProps) => {
-  const { mode, basePalette } = useTheme();
+  const { mode, basePalette, primaryColor } = useTheme();
   const monaco = useMonaco();
 
   const handleEditorChange = (value: string | undefined) => {
@@ -61,6 +61,22 @@ export const Editor = ({
       
       const currentBg = bgColors[basePalette as keyof typeof bgColors] || '#141414';
 
+      const primaryHexColors = {
+        indigo: '#6366f1',
+        blue: '#3b82f6',
+        emerald: '#10b981',
+        rose: '#f43f5e',
+        orange: '#f97316',
+        violet: '#8b5cf6',
+        cyan: '#06b6d4',
+        teal: '#0d9488',
+        fuchsia: '#d946ef',
+        lime: '#84cc16',
+        sky: '#0ea5e9',
+        pink: '#ec4899',
+      };
+      const primaryHex = primaryHexColors[primaryColor as keyof typeof primaryHexColors] || '#6366f1';
+
       monaco.editor.defineTheme('premium-dark', {
         base: 'vs-dark',
         inherit: true,
@@ -68,17 +84,22 @@ export const Editor = ({
         colors: {
           'editor.background': currentBg,
           'editor.foreground': '#cbd5e1',
-          'editorCursor.foreground': 'hsl(var(--primary))',
+          'editorCursor.foreground': primaryHex,
           'editor.lineHighlightBackground': mode === 'dark' ? '#ffffff06' : '#00000006',
           'editorLineNumber.foreground': '#475569',
-          'editor.selectionBackground': 'hsl(var(--primary)/0.25)',
-          'editor.inactiveSelectionBackground': 'hsl(var(--primary)/0.1)',
+          'editor.selectionBackground': primaryHex + '40', // 25% opacity
+          'editor.inactiveSelectionBackground': primaryHex + '1a', // 10% opacity
+          'editor.selectionHighlightBackground': primaryHex + '26', // 15% opacity
+          'editor.wordHighlightBackground': primaryHex + '26',
+          'editor.wordHighlightStrongBackground': primaryHex + '33',
+          'editor.findMatchBackground': primaryHex + '4d',
+          'editor.findMatchHighlightBackground': primaryHex + '26',
         }
       });
       
       monaco.editor.setTheme(mode === 'dark' ? 'premium-dark' : 'light');
     }
-  }, [monaco, basePalette, mode]);
+  }, [monaco, basePalette, mode, primaryColor]);
 
   return (
     <div className={`h-full w-full overflow-hidden rounded-md ${className}`}>
