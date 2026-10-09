@@ -2,67 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Defaults match the "charcoal" dark palette so the first paint is correct
+   before ThemeContext writes the live values. */
 @layer base {
   :root {
-    --background: 210 40% 98%; /* slate-50 */
-    --foreground: 222.2 84% 4.9%; /* slate-950 */
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
- 
+    --background: 0 0% 100%;
+    --foreground: 224 24% 9%;
+    --surface-1: 220 20% 98%;
+    --surface-2: 220 16% 96%;
+    --surface-3: 220 14% 93%;
+    --card: 220 20% 98%;
+    --card-foreground: 224 24% 9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
- 
-    --primary: 243 75% 59%; /* indigo-600 */
-    --primary-foreground: 210 40% 98%;
- 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
- 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
- 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
- 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 243 75% 59%;
- 
-    --radius: 0.75rem;
+    --popover-foreground: 224 24% 9%;
+    --primary: 243 75% 62%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 226 100% 97%;
+    --secondary: 220 16% 96%;
+    --secondary-foreground: 224 24% 9%;
+    --muted: 220 16% 96%;
+    --muted-foreground: 220 9% 44%;
+    --accent: 220 14% 93%;
+    --accent-foreground: 224 24% 9%;
+    --border: 220 13% 90%;
+    --border-subtle: 220 14% 94%;
+    --border-strong: 220 9% 80%;
+    --input: 220 13% 90%;
+    --ring: 243 75% 62%;
+    --radius: 0.5rem;
   }
- 
+
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
- 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
- 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
- 
-    --primary: 243 75% 59%; /* Keep primary consistent or slightly lighter */
-    --primary-foreground: 210 40% 98%;
- 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
- 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
- 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
- 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
- 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 243 75% 59%;
+    --background: 240 5% 6%;
+    --foreground: 240 5% 96%;
+    --surface-1: 240 4% 9%;
+    --surface-2: 240 4% 11.5%;
+    --surface-3: 240 4% 14.5%;
+    --card: 240 4% 9%;
+    --card-foreground: 240 5% 96%;
+    --popover: 240 4% 10%;
+    --popover-foreground: 240 5% 96%;
+    --secondary: 240 4% 11.5%;
+    --secondary-foreground: 240 5% 96%;
+    --muted: 240 4% 11.5%;
+    --muted-foreground: 240 5% 62%;
+    --accent: 240 4% 14.5%;
+    --accent-foreground: 240 5% 96%;
+    --border: 240 4% 16%;
+    --border-subtle: 240 4% 12.5%;
+    --border-strong: 240 4% 23%;
+    --input: 240 4% 16%;
   }
 }
 
@@ -70,53 +59,137 @@
   * {
     @apply border-border;
   }
-  body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-300;
-    background-image: linear-gradient(to bottom right, var(--bg-tint, transparent), transparent);
-    background-attachment: fixed;
+
+  html,
+  body,
+  #root {
+    height: 100%;
   }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.28);
+  }
+
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight font-bold text-slate-900 dark:text-white;
+    @apply tracking-tight font-semibold text-foreground;
+  }
+
+  code, kbd, pre, samp {
+    @apply font-mono;
+  }
+}
+
+@layer components {
+  /* 1px inner top highlight that gives cards a subtle "lit" edge in dark mode */
+  .hairline {
+    box-shadow: inset 0 1px 0 0 hsl(0 0% 100% / 0.035);
+  }
+  .light .hairline {
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  }
+
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-ring/70 focus-visible:ring-offset-1 focus-visible:ring-offset-background;
+  }
+
+  /* Translucent chrome (sidebar / topbar / palette) when "glass" is enabled */
+  .chrome {
+    background-color: hsl(var(--background) / 0.98);
+  }
+  [data-glass='true'] .chrome {
+    background-color: hsl(var(--background) / 0.72);
+    backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  .label-caps {
+    @apply text-2xs font-semibold uppercase tracking-[0.08em] text-muted-foreground;
   }
 }
 
 @layer utilities {
-  .glass {
-    @apply backdrop-blur-md border border-white/20 dark:border-white/5 shadow-lg;
-    background-color: rgba(255, 255, 255, 0.7);
+  /* Soft accent glow used behind hero areas */
+  .bg-aurora {
+    background-image:
+      radial-gradient(60rem 22rem at 50% -8rem, hsl(var(--primary) / 0.16), transparent 70%),
+      radial-gradient(30rem 16rem at 85% -4rem, hsl(var(--primary) / 0.08), transparent 70%);
   }
-  .dark .glass {
-    background-color: hsla(var(--card) / 0.7);
-  }
-
-  /* Disable glass when data-glass is false */
-  [data-glass="false"] .glass {
-    @apply backdrop-blur-none bg-card border-border;
-    background-color: hsl(var(--card));
+  .light .bg-aurora {
+    background-image:
+      radial-gradient(60rem 22rem at 50% -8rem, hsl(var(--primary) / 0.10), transparent 70%);
   }
 
-  .glass-panel {
-     @apply backdrop-blur-sm border border-slate-200/50 dark:border-slate-800/50;
-     background-color: rgba(255, 255, 255, 0.5);
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, hsl(var(--border) / 0.35) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.35) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(ellipse at top, black 20%, transparent 70%);
   }
-  .dark .glass-panel {
-     background-color: hsla(var(--card) / 0.5);
+
+  .text-gradient {
+    background-image: linear-gradient(180deg, hsl(var(--foreground)) 30%, hsl(var(--foreground) / 0.55));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
-  
-  [data-glass="false"] .glass-panel {
-     @apply backdrop-blur-none bg-card border-border;
-     background-color: hsl(var(--card));
+
+  .no-scrollbar,
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar,
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, hsl(var(--surface-2)) 0%, hsl(var(--surface-3)) 50%, hsl(var(--surface-2)) 100%);
+    background-size: 200% 100%;
+    @apply animate-shimmer;
   }
 }
 
-/* Custom Scrollbar */
+/* Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border-strong)) transparent;
+}
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-slate-700 rounded-full hover:bg-slate-400 dark:hover:bg-slate-600 transition-colors;
+  background-color: hsl(var(--border-strong));
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* react-json-view-lite: blend tree view into the theme */
+.json-tree-theme {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

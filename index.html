@@ -1,31 +1,55 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ubais Toolkit</title>
     <meta
       name="description"
-      content="A collection of useful developer tools built by Ubais."
+      content="A fast, keyboard-first collection of developer tools: JSON, diff, regex, JWT, Base64, cron, QR, timestamps and more."
     />
+    <meta name="theme-color" content="#0f0f11" />
+    <meta name="color-scheme" content="dark light" />
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-   <!-- Open Graph -->
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    />
+
+    <!-- Apply the saved theme before first paint to avoid a light flash -->
+    <script>
+      (function () {
+        try {
+          // ?__theme=light|dark|system overrides the saved mode (handy for screenshots / sharing)
+          var forced = new URLSearchParams(location.search).get('__theme');
+          if (forced === 'light' || forced === 'dark' || forced === 'system') localStorage.setItem('theme-mode', forced);
+          var mode = localStorage.getItem('theme-mode') || 'dark';
+          var dark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var root = document.documentElement;
+          root.classList.remove('dark', 'light');
+          root.classList.add(dark ? 'dark' : 'light');
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Ubais Toolkit" />
     <meta
       property="og:description"
-      content="A collection of useful developer tools built by Ubais."
+      content="A fast, keyboard-first collection of developer tools built by Ubais."
     />
-    <meta
-      property="og:url"
-      content="https://ubais-toolkit.vercel.app/"
-    />
+    <meta property="og:url" content="https://ubais-toolkit.vercel.app/" />
     <!-- Twitter -->
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Ubais Toolkit" />
     <meta
       name="twitter:description"
-      content="A collection of useful developer tools built by Ubais."
+      content="A fast, keyboard-first collection of developer tools built by Ubais."
     />
   </head>
   <body>

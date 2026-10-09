@@ -15,7 +15,7 @@ export const Logo = ({ className = "w-8 h-8" }: { className?: string }) => {
       <defs>
         <linearGradient id={gradientId} x1="16" y1="14" x2="86" y2="88" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="hsl(var(--primary))" />
-          <stop offset="100%" stopColor="#312E81" />
+          <stop offset="100%" style={{ stopColor: 'color-mix(in oklab, hsl(var(--primary)) 50%, black)' }} />
         </linearGradient>
         <linearGradient id={highlightId} x1="22" y1="18" x2="74" y2="76" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.26" />
@@ -52,8 +52,8 @@ export const Logo = ({ className = "w-8 h-8" }: { className?: string }) => {
         strokeLinejoin="round"
         opacity="0.88"
       />
-      <path d="M55 43L46 63" stroke="#93C5FD" strokeWidth="5.5" strokeLinecap="round" />
-      <circle cx="72" cy="27" r="3.5" fill="#93C5FD" />
+      <path d="M55 43L46 63" stroke="hsl(var(--primary-light))" strokeWidth="5.5" strokeLinecap="round" />
+      <circle cx="72" cy="27" r="3.5" fill="hsl(var(--primary-light))" />
     </svg>
   );
 };

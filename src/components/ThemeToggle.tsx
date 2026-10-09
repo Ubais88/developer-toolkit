@@ -1,23 +1,34 @@
-import { Moon, Sun } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
-import { Button } from './Button';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Monitor, Moon, Sun } from 'lucide-react';
+import { useTheme, type ThemeMode } from '../context/ThemeContext';
+import { IconButton } from './ui/IconButton';
 
-export function ThemeToggle() {
-    const { mode, setMode } = useTheme();
+const NEXT: Record<ThemeMode, ThemeMode> = { dark: 'light', light: 'system', system: 'dark' };
+const LABEL: Record<ThemeMode, string> = { dark: 'Dark theme', light: 'Light theme', system: 'System theme' };
 
-    return (
-        <Button
-            variant="ghost"
-            size="none"
-            onClick={() => setMode(mode === 'dark' ? 'light' : 'dark')}
-            className="rounded-full w-10 h-10 p-0"
-            title={`Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`}
+/** Cycles dark → light → system with an animated icon swap. */
+export function ThemeToggle({ tooltipSide = 'bottom' }: { tooltipSide?: 'top' | 'bottom' | 'left' | 'right' }) {
+  const { mode, setMode } = useTheme();
+  const Icon = mode === 'dark' ? Moon : mode === 'light' ? Sun : Monitor;
+
+  return (
+    <IconButton
+      label={`${LABEL[mode]} — switch to ${NEXT[mode]}`}
+      tooltipSide={tooltipSide}
+      onClick={() => setMode(NEXT[mode])}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span
+          key={mode}
+          initial={{ rotate: -90, scale: 0.5, opacity: 0 }}
+          animate={{ rotate: 0, scale: 1, opacity: 1 }}
+          exit={{ rotate: 90, scale: 0.5, opacity: 0 }}
+          transition={{ duration: 0.18 }}
+          className="inline-flex"
         >
-            {mode === 'dark' ? (
-                <Sun className="h-5 w-5 text-yellow-500 transition-all duration-300 rotate-0 scale-100" />
-            ) : (
-                <Moon className="h-5 w-5 text-slate-700 transition-all duration-300 rotate-0 scale-100" />
-            )}
-        </Button>
-    );
+          <Icon />
+        </motion.span>
+      </AnimatePresence>
+    </IconButton>
+  );
 }
